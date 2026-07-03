@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMotionValueEvent, useScroll } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Container } from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
+import { MagneticButton } from "@/components/motion/MagneticButton";
 import { cn } from "@/lib/utils";
 import { nav, hero } from "@/content/site";
 
@@ -49,7 +50,11 @@ export function Header() {
       )}
     >
       <Container className="flex h-20 items-center justify-between">
-        <a href="#" className="focus-ring rounded-sm" aria-label={`${"SillettiX"} home`}>
+        <a
+          href="#"
+          className="focus-ring rounded-sm transition-transform duration-300 hover:scale-105"
+          aria-label="SillettiX home"
+        >
           <Logo variant="lockup" height={28} priority />
         </a>
 
@@ -60,19 +65,27 @@ export function Header() {
               href={item.href}
               aria-current={activeHref === item.href ? "true" : undefined}
               className={cn(
-                "focus-ring rounded-sm text-sm transition-colors hover:text-foreground",
+                "group focus-ring relative rounded-sm text-sm transition-colors hover:text-foreground",
                 activeHref === item.href ? "text-accent" : "text-foreground-muted"
               )}
             >
               {item.label}
+              <span
+                className={cn(
+                  "absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-300 ease-out group-hover:scale-x-100",
+                  activeHref === item.href && "scale-x-100"
+                )}
+              />
             </a>
           ))}
         </nav>
 
         <div className="hidden lg:block">
-          <ButtonLink href={hero.primaryCta.href} variant="primary" className="text-xs px-4 py-2.5">
-            {hero.primaryCta.label}
-          </ButtonLink>
+          <MagneticButton strength={0.3}>
+            <ButtonLink href={hero.primaryCta.href} variant="primary" className="text-xs px-4 py-2.5">
+              {hero.primaryCta.label}
+            </ButtonLink>
+          </MagneticButton>
         </div>
 
         <button
@@ -82,34 +95,53 @@ export function Header() {
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          <motion.span
+            key={mobileOpen ? "close" : "open"}
+            initial={{ rotate: -90, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className="block"
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </motion.span>
         </button>
       </Container>
 
-      {mobileOpen && (
-        <div className="lg:hidden border-t border-border bg-background">
-          <Container className="flex flex-col gap-1 py-4">
-            {nav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:hidden overflow-hidden border-t border-border bg-background"
+          >
+            <Container className="flex flex-col gap-1 py-4">
+              {nav.map((item, i) => (
+                <motion.a
+                  key={item.href}
+                  href={item.href}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
+                  onClick={() => setMobileOpen(false)}
+                  className="focus-ring rounded-sm py-3 text-sm text-foreground-muted transition-colors hover:text-foreground hover:pl-2"
+                >
+                  {item.label}
+                </motion.a>
+              ))}
+              <ButtonLink
+                href={hero.primaryCta.href}
+                variant="primary"
+                className="mt-3 w-full"
                 onClick={() => setMobileOpen(false)}
-                className="focus-ring rounded-sm py-3 text-sm text-foreground-muted transition-colors hover:text-foreground"
               >
-                {item.label}
-              </a>
-            ))}
-            <ButtonLink
-              href={hero.primaryCta.href}
-              variant="primary"
-              className="mt-3 w-full"
-              onClick={() => setMobileOpen(false)}
-            >
-              {hero.primaryCta.label}
-            </ButtonLink>
-          </Container>
-        </div>
-      )}
+                {hero.primaryCta.label}
+              </ButtonLink>
+            </Container>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

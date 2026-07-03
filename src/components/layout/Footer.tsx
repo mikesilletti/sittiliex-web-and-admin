@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-border">
       <Container className="py-16">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-xs">
+          <div className="max-w-xs transition-opacity duration-300 hover:opacity-80">
             <Logo variant="lockup" height={26} />
             <p className="mt-4 text-body-sm text-foreground-muted">{footer.tagline}</p>
           </div>
@@ -17,16 +17,21 @@ export function Footer() {
               <a
                 key={item.href}
                 href={item.href}
-                className="focus-ring rounded-sm text-sm text-foreground-muted transition-colors hover:text-foreground"
+                className="group focus-ring relative rounded-sm text-sm text-foreground-muted transition-colors hover:text-foreground"
               >
                 {item.label}
+                <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-300 ease-out group-hover:scale-x-100" />
               </a>
             ))}
           </nav>
 
           <div className="text-sm text-foreground-muted">
-            <a href={`mailto:${contact.email}`} className="focus-ring rounded-sm hover:text-foreground">
+            <a
+              href={`mailto:${contact.email}`}
+              className="group focus-ring relative rounded-sm hover:text-foreground"
+            >
               {contact.email}
+              <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-300 ease-out group-hover:scale-x-100" />
             </a>
           </div>
         </div>

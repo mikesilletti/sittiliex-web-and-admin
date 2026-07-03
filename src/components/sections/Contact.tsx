@@ -7,6 +7,8 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
+import { ParallaxImage } from "@/components/motion/ParallaxImage";
+import { MagneticButton } from "@/components/motion/MagneticButton";
 import { contactSchema } from "@/lib/contact-schema";
 import { contact } from "@/content/site";
 
@@ -73,8 +75,23 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="py-24 md:py-32">
-      <Container>
+    <section id="contact" className="relative py-24 md:py-32 overflow-hidden">
+      <ParallaxImage
+        src="/images/contact-office.jpg"
+        alt=""
+        className="absolute inset-0"
+        imgClassName="opacity-20"
+        strength={40}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, var(--color-background) 0%, rgba(7,9,12,0.7) 40%, var(--color-background) 100%)",
+        }}
+      />
+      <Container className="relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <RevealOnScroll>
             <SectionHeading
@@ -148,9 +165,11 @@ export function Contact() {
                 )}
               </div>
 
-              <Button type="submit" variant="primary" disabled={status === "submitting"} className="mt-2">
-                {status === "submitting" ? "Sending…" : "Send Message"}
-              </Button>
+              <MagneticButton strength={0.2} className="mt-2 w-full">
+                <Button type="submit" variant="primary" disabled={status === "submitting"} className="w-full">
+                  {status === "submitting" ? "Sending…" : "Send Message"}
+                </Button>
+              </MagneticButton>
 
               {status === "error" && (
                 <p className="text-xs text-red-400">

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
+import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
+import { CursorGlow } from "@/components/motion/CursorGlow";
+import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
+import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -40,7 +44,10 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${inter.variable} h-full`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body antialiased">
-        {children}
+        <NoiseOverlay />
+        <ScrollProgressBar />
+        <CursorGlow />
+        <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>
   );

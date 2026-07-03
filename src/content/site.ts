@@ -101,6 +101,15 @@ export const industries = [
   "Professional Services",
 ];
 
+export const featuredIndustries = [
+  { id: "manufacturing", name: "Manufacturing", image: "/images/industry-manufacturing.jpg" },
+  { id: "logistics", name: "Logistics", image: "/images/industry-logistics.jpg" },
+  { id: "b2b-services", name: "B2B Services", image: "/images/industry-warehouse.jpg" },
+  { id: "software", name: "Software & SaaS", image: "/images/industry-tech.jpg" },
+  { id: "facility", name: "Facility & Construction", image: "/images/industry-construction.jpg" },
+  { id: "trades", name: "Skilled Trades", image: "/images/industry-trades.jpg" },
+];
+
 export const whatWeLookFor = [
   "Established business with a proven track record",
   "Consistent profitability",

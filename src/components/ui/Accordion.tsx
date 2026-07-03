@@ -16,21 +16,29 @@ export function Accordion({ items }: { items: { id: string; question: string; an
           <div key={item.id}>
             <button
               type="button"
-              className="focus-ring flex w-full items-center justify-between gap-4 py-6 text-left"
+              className="group focus-ring flex w-full items-center justify-between gap-4 py-6 text-left transition-colors duration-300 hover:bg-accent/5 px-3 -mx-3 rounded-sm"
               aria-expanded={isOpen}
               aria-controls={`faq-panel-${item.id}`}
               onClick={() => setOpenId(isOpen ? null : item.id)}
             >
-              <span className="text-body-lg font-heading font-medium text-foreground">
+              <span
+                className={cn(
+                  "text-body-lg font-heading font-medium transition-colors duration-300",
+                  isOpen ? "text-accent" : "text-foreground group-hover:text-accent"
+                )}
+              >
                 {item.question}
               </span>
-              <ChevronDown
-                size={20}
+              <motion.span
+                animate={{ rotate: isOpen ? 180 : 0 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "shrink-0 text-foreground-muted transition-transform duration-300",
-                  isOpen && "rotate-180 text-accent"
+                  "shrink-0 transition-colors duration-300",
+                  isOpen ? "text-accent" : "text-foreground-muted group-hover:text-accent"
                 )}
-              />
+              >
+                <ChevronDown size={20} />
+              </motion.span>
             </button>
             <AnimatePresence initial={false}>
               {isOpen && (
@@ -43,7 +51,7 @@ export function Accordion({ items }: { items: { id: string; question: string; an
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className="overflow-hidden"
                 >
-                  <p className="pb-6 text-body-md text-foreground-muted max-w-2xl">
+                  <p className="px-3 -mx-3 pb-6 text-body-md text-foreground-muted max-w-2xl">
                     {item.answer}
                   </p>
                 </motion.div>
