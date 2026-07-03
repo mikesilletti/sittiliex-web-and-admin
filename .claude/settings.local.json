@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"C:/Users/graph/Downloads/\" | grep -i \"FO729\")",
+      "Bash(mkdir -p \"/c/Users/graph/AppData/Local/Temp/claude/F--landing-page/5f1f5e76-14ed-455b-938f-d5450c1f3d41/scratchpad/brand\")",
+      "Read(//c/Users/graph/AppData/Local/Temp/claude/F--landing-page/5f1f5e76-14ed-455b-938f-d5450c1f3d41/scratchpad/**)",
+      "Bash(unzip -o -q \"/c/Users/graph/Downloads/FO729C90598C5 - rev 2.zip\")",
+      "Bash(cd \"/c/Users/graph/AppData/Local/Temp/claude/F--landing-page/5f1f5e76-14ed-455b-938f-d5450c1f3d41/scratchpad/brand\" && find . -type f | sort)",
+      "Bash(npm --version)",
+      "Bash(pip show *)",
+      "Bash(npx --yes svgo --version)",
+      "Bash(npx --yes svgo --help)",
+      "Bash(python3 -c ' *)",
+      "Bash(file *.png)"
+    ]
+  }
+}

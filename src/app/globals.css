@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces — elevation via lightness steps, no extra hues */
+  --color-background: #07090c;
+  --color-background-raised: #0d1117;
+  --color-background-overlay: #11151b;
+
+  /* Text */
+  --color-foreground: #f4f6f8;
+  --color-foreground-muted: #9aa4b2;
+  --color-foreground-subtle: #5c6675;
+
+  /* Single brand accent, sampled from the SillettiX logo kit (#1ab4ff) */
+  --color-accent: #1ab4ff;
+  --color-accent-hover: #3fc2ff;
+
+  /* Borders */
+  --color-border: #1e2530;
+  --color-border-strong: #2a3340;
+
+  /* Fonts, loaded via next/font in layout.tsx */
+  --font-heading: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, sans-serif;
+
+  /* Display type scale for the hero/section headings */
+  --text-display-lg: clamp(2.75rem, 5vw + 1rem, 5.5rem);
+  --text-display-lg--line-height: 1.02;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 600;
+
+  --text-display-md: clamp(2.25rem, 3.5vw + 1rem, 3.75rem);
+  --text-display-md--line-height: 1.05;
+  --text-display-md--letter-spacing: -0.015em;
+  --text-display-md--font-weight: 600;
+
+  --text-display-sm: clamp(1.75rem, 2vw + 1rem, 2.5rem);
+  --text-display-sm--line-height: 1.1;
+  --text-display-sm--letter-spacing: -0.01em;
+  --text-display-sm--font-weight: 600;
+
+  --text-eyebrow: 0.8125rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.14em;
+  --text-eyebrow--font-weight: 600;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
+
+  --text-body-md: 1rem;
+  --text-body-md--line-height: 1.6;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+
+  /* Radius system — badge ratio (23%) matches the icon mark's own corner ratio */
+  --radius-sm: 6px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-badge: 23%;
+
+  /* Glow shadows built from the accent color */
+  --shadow-glow-sm: 0 0 24px 0 rgba(26, 180, 255, 0.25);
+  --shadow-glow-md: 0 0 48px 0 rgba(26, 180, 255, 0.3);
+  --shadow-glow-lg: 0 0 96px 0 rgba(26, 180, 255, 0.35);
+  --shadow-card-hover: 0 8px 32px -8px rgba(26, 180, 255, 0.25), 0 0 0 1px rgba(26, 180, 255, 0.4);
+
+  --container-page: 1200px;
+
+  --animate-pulse-glow: pulse-glow 4s ease-in-out infinite;
+  --animate-grid-drift: grid-drift 20s linear infinite;
+  --animate-marquee: marquee 30s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes grid-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-background);
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced-motion safety net — belt-and-suspenders alongside Framer Motion's
+   own useReducedMotion() checks in individual components. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
