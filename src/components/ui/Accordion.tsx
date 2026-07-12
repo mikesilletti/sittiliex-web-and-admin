@@ -10,7 +10,7 @@ export function Accordion({ items }: { items: { id: string; question: string; an
 
   return (
     <div className="divide-y divide-border border-t border-b border-border">
-      {items.map((item) => {
+      {items.map((item, i) => {
         const isOpen = openId === item.id;
         return (
           <div key={item.id}>
@@ -21,13 +21,23 @@ export function Accordion({ items }: { items: { id: string; question: string; an
               aria-controls={`faq-panel-${item.id}`}
               onClick={() => setOpenId(isOpen ? null : item.id)}
             >
-              <span
-                className={cn(
-                  "text-body-lg font-heading font-medium transition-colors duration-300",
-                  isOpen ? "text-accent" : "text-foreground group-hover:text-accent"
-                )}
-              >
-                {item.question}
+              <span className="flex items-baseline gap-4">
+                <span
+                  className={cn(
+                    "font-heading text-sm tabular-nums transition-colors duration-300",
+                    isOpen ? "text-accent" : "text-foreground-subtle"
+                  )}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span
+                  className={cn(
+                    "text-body-lg font-heading font-medium transition-colors duration-300",
+                    isOpen ? "text-accent" : "text-foreground group-hover:text-accent"
+                  )}
+                >
+                  {item.question}
+                </span>
               </span>
               <motion.span
                 animate={{ rotate: isOpen ? 180 : 0 }}
@@ -51,7 +61,7 @@ export function Accordion({ items }: { items: { id: string; question: string; an
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className="overflow-hidden"
                 >
-                  <p className="px-3 -mx-3 pb-6 text-body-md text-foreground-muted max-w-2xl">
+                  <p className="px-3 -mx-3 pb-6 pl-[3.25rem] text-body-md text-foreground-muted max-w-2xl">
                     {item.answer}
                   </p>
                 </motion.div>

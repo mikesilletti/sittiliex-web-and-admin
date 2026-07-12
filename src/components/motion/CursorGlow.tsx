@@ -16,6 +16,9 @@ export function CursorGlow() {
     if (shouldReduceMotion) return;
     const isFinePointer = window.matchMedia("(pointer: fine)").matches;
     if (!isFinePointer) return;
+    // Pointer capability is only knowable client-side; setting it post-mount (rather than
+    // via a lazy initial state) keeps the first client render matching the SSR output.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEnabled(true);
 
     function handleMove(e: MouseEvent) {

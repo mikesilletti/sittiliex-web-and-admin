@@ -3,6 +3,8 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
 import { CursorGlow } from "@/components/motion/CursorGlow";
 import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
+import { ScrollAscentRail } from "@/components/motion/ScrollAscentRail";
+import { LoadingScreen } from "@/components/motion/LoadingScreen";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import "./globals.css";
 
@@ -44,8 +46,10 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${inter.variable} h-full`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body antialiased">
+        <LoadingScreen />
         <NoiseOverlay />
         <ScrollProgressBar />
+        <ScrollAscentRail />
         <CursorGlow />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>

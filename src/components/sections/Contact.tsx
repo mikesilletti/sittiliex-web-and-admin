@@ -3,12 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { MagneticButton } from "@/components/motion/MagneticButton";
+import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { contactSchema } from "@/lib/contact-schema";
 import { contact } from "@/content/site";
 
@@ -65,7 +65,7 @@ export function Contact() {
                 Message received.
               </h3>
               <p className="mt-2 text-body-md text-foreground-muted">
-                Thank you for reaching out — we'll be in touch soon, in complete confidence.
+                Thank you for reaching out — we&apos;ll be in touch soon, in complete confidence.
               </p>
             </div>
           </RevealOnScroll>
@@ -93,19 +93,32 @@ export function Contact() {
       />
       <Container className="relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          <RevealOnScroll>
-            <SectionHeading
-              eyebrow={contact.eyebrow}
-              heading={contact.heading}
-              description={contact.body}
+          <div className="max-w-2xl">
+            <RevealOnScroll>
+              <p className="text-eyebrow uppercase text-accent mb-4">{contact.eyebrow}</p>
+            </RevealOnScroll>
+            <ScrubReveal
+              as="h2"
+              text={contact.heading}
+              className="text-display-sm md:text-display-md font-heading text-foreground"
             />
-            <p className="mt-8 text-sm text-foreground-muted">
-              Prefer email?{" "}
-              <a href={`mailto:${contact.email}`} className="focus-ring rounded-sm text-accent hover:text-accent-hover">
-                {contact.email}
-              </a>
-            </p>
-          </RevealOnScroll>
+            <RevealOnScroll delay={0.1}>
+              <p className="mt-4 text-body-lg text-foreground-muted text-balance">{contact.body}</p>
+            </RevealOnScroll>
+            <RevealOnScroll delay={0.15}>
+              <div className="mt-8 text-sm text-foreground-muted">
+                Prefer email?{" "}
+                <MagneticButton strength={0.25} className="inline-block">
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="focus-ring rounded-sm text-accent hover:text-accent-hover"
+                  >
+                    {contact.email}
+                  </a>
+                </MagneticButton>
+              </div>
+            </RevealOnScroll>
+          </div>
 
           <RevealOnScroll delay={0.1}>
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">

@@ -9,13 +9,11 @@ export function SplitText({
   className,
   delay = 0,
   stagger = 0.06,
-  once = true,
 }: {
   text: string;
   className?: string;
   delay?: number;
   stagger?: number;
-  once?: boolean;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const words = text.split(" ");
@@ -32,8 +30,7 @@ export function SplitText({
             <motion.span
               className="inline-block"
               initial={{ y: "110%" }}
-              whileInView={{ y: "0%" }}
-              viewport={{ once, margin: "-10%" }}
+              animate={{ y: "0%" }}
               transition={{
                 duration: 0.8,
                 delay: delay + i * stagger,

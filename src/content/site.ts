@@ -13,7 +13,6 @@ export const nav: NavItem[] = [
   { label: "Industries", href: "#industries" },
   { label: "Process", href: "#process" },
   { label: "Acquisitions", href: "#acquisitions" },
-  { label: "Team", href: "#team" },
   { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];
@@ -159,14 +158,6 @@ export const recentAcquisitions = {
   cta: { label: "Start the Conversation", href: "#contact" },
 };
 
-export const team = {
-  eyebrow: "Meet the Team",
-  heading: "Founder-Led. Operator-First.",
-  monogram: "S",
-  role: "Founder & Managing Partner",
-  bio: "SillettiX was founded on a simple belief: great businesses deserve great long-term owners. We're entrepreneurs first — not brokers. When we acquire a business, we're not looking for a quick flip. We're looking for our next great business to build for decades.",
-};
-
 export const ourPromise = {
   eyebrow: "Our Promise",
   heading: "Great Businesses Deserve Great Long-Term Owners.",
@@ -216,7 +207,7 @@ export const contact = {
   eyebrow: "Let's Start the Conversation",
   heading: "Ready to Talk About Your Next Chapter?",
   body: "If you've been thinking about selling your business — whether next month or five years from now — we'd love to connect. Every conversation is completely confidential, with no pressure and no obligation.",
-  email: "hello@sillettix.com",
+  email: "Deals@sillettix.com",
 };
 
 export const footer = {

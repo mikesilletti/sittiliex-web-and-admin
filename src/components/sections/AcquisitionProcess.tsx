@@ -19,6 +19,7 @@ export function AcquisitionProcess() {
   });
 
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const dotTop = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const idx = Math.min(processSteps.length - 1, Math.floor(v * processSteps.length));
@@ -49,10 +50,21 @@ export function AcquisitionProcess() {
           <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             {/* Left: stepper */}
             <div className="relative pl-16">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-4 -top-10 select-none font-heading text-8xl font-semibold text-foreground/[0.04]"
+              >
+                {String(active + 1).padStart(2, "0")}
+              </span>
               <div className="absolute left-6 top-1 bottom-1 w-px bg-border" />
               <motion.div
                 className="absolute left-6 top-1 w-px origin-top bg-accent shadow-glow-sm"
                 style={{ scaleY: lineScale, height: "calc(100% - 8px)" }}
+              />
+              <motion.div
+                aria-hidden="true"
+                className="absolute left-6 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-glow-md"
+                style={{ top: dotTop }}
               />
 
               {processSteps.map((step, i) => (

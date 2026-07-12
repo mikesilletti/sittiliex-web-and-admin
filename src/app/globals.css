@@ -24,7 +24,7 @@
   --font-body: var(--font-inter), ui-sans-serif, sans-serif;
 
   /* Display type scale for the hero/section headings */
-  --text-display-lg: clamp(2.75rem, 5vw + 1rem, 5.5rem);
+  --text-display-lg: clamp(2rem, 7vw + 0.5rem, 5.5rem);
   --text-display-lg--line-height: 1.02;
   --text-display-lg--letter-spacing: -0.02em;
   --text-display-lg--font-weight: 600;
