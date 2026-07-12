@@ -2,18 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring, useMotionValueEvent } from "framer-motion";
-import { nav } from "@/content/site";
 import { useActiveSection } from "@/lib/use-active-section";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import type { NavItem } from "@/types/content";
 
-const hrefs = nav.map((item) => item.href);
-
-export function ScrollAscentRail() {
+export function ScrollAscentRail({ nav }: { nav: NavItem[] }) {
   const shouldReduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const scaleY = useSpring(scrollYProgress, { stiffness: 200, damping: 40, restDelta: 0.001 });
-  const activeHref = useActiveSection(hrefs);
+  const activeHref = useActiveSection(nav.map((item) => item.href));
   const [percent, setPercent] = useState(0);
   const [marks, setMarks] = useState<{ href: string; offset: number }[]>([]);
 
@@ -40,7 +38,7 @@ export function ScrollAscentRail() {
       window.clearTimeout(timeout);
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [nav]);
 
   if (shouldReduceMotion) return null;
 

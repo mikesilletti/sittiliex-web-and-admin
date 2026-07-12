@@ -1,31 +1,26 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { Hero } from "@/components/sections/Hero";
-import { TrustStrip } from "@/components/sections/TrustStrip";
-import { WhySellToUs } from "@/components/sections/WhySellToUs";
-import { OurPromise } from "@/components/sections/OurPromise";
-import { IndustriesGrid } from "@/components/sections/IndustriesGrid";
-import { AcquisitionProcess } from "@/components/sections/AcquisitionProcess";
-import { RecentAcquisitions } from "@/components/sections/RecentAcquisitions";
-import { FAQ } from "@/components/sections/FAQ";
-import { Contact } from "@/components/sections/Contact";
+import { getPublicSupabaseClient } from "@/lib/supabase/server";
+import { sectionRegistry } from "@/lib/section-registry";
+import type { SectionRow } from "@/types/content";
 
-export default function Home() {
+export const revalidate = 300;
+
+export default async function Home() {
+  const supabase = getPublicSupabaseClient();
+  const { data } = await supabase
+    .from("sections")
+    .select("*")
+    .eq("is_visible", true)
+    .order("sort_order", { ascending: true });
+
+  const sections = (data ?? []) as SectionRow[];
+
   return (
-    <>
-      <Header />
-      <main>
-        <Hero />
-        <TrustStrip />
-        <WhySellToUs />
-        <OurPromise />
-        <IndustriesGrid />
-        <AcquisitionProcess />
-        <RecentAcquisitions />
-        <FAQ />
-        <Contact />
-      </main>
-      <Footer />
-    </>
+    <main>
+      {sections.map((section) => {
+        const Component = sectionRegistry[section.type];
+        if (!Component) return null;
+        return <Component key={section.id} content={section.content as never} />;
+      })}
+    </main>
   );
 }

@@ -10,16 +10,24 @@
     "brand:crop": "node scripts/crop-svgs.mjs",
     "brand:optimize": "svgo -f public/brand -r --config svgo.config.mjs",
     "brand:favicons": "node scripts/generate-favicons.mjs",
-    "brand:build": "npm run brand:crop && npm run brand:optimize && npm run brand:favicons"
+    "brand:build": "npm run brand:crop && npm run brand:optimize && npm run brand:favicons",
+    "seed:cms": "node --env-file=.env.local scripts/seed-cms.mjs"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@supabase/supabase-js": "^2.110.2",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.42.2",
+    "jose": "^6.2.3",
     "lenis": "^1.3.25",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },

@@ -10,11 +10,11 @@ import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { contactSchema } from "@/lib/contact-schema";
-import { contact } from "@/content/site";
+import type { ContactContent } from "@/types/content";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export function Contact() {
+export function Contact({ content: contact }: { content: ContactContent }) {
   const [values, setValues] = useState({ name: "", email: "", company: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -77,7 +77,7 @@ export function Contact() {
   return (
     <section id="contact" className="relative py-24 md:py-32 overflow-hidden">
       <ParallaxImage
-        src="/images/contact-office.jpg"
+        src={contact.backgroundImage}
         alt=""
         className="absolute inset-0"
         imgClassName="opacity-20"

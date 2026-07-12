@@ -3,9 +3,9 @@ import { TiltCard } from "@/components/motion/TiltCard";
 import { RevealImage } from "@/components/motion/RevealImage";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
-import { whySellToUs } from "@/content/site";
+import type { WhySellToUsContent } from "@/types/content";
 
-export function WhySellToUs() {
+export function WhySellToUs({ content: whySellToUs }: { content: WhySellToUsContent }) {
   return (
     <section id="why-us" className="py-24 md:py-32 overflow-hidden">
       <Container>
@@ -25,8 +25,8 @@ export function WhySellToUs() {
 
         <div className="mt-16 grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-stretch">
           <RevealImage
-            src="/images/why-us-office.jpg"
-            alt="Modern office interior"
+            src={whySellToUs.image}
+            alt={whySellToUs.imageAlt}
             className="lg:col-span-2 rounded-lg min-h-[320px] lg:min-h-0"
             sizes="(min-width: 1024px) 40vw, 100vw"
           />

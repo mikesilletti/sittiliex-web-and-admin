@@ -10,19 +10,11 @@ import { MagneticButton } from "@/components/motion/MagneticButton";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
-import { recentAcquisitions } from "@/content/site";
+import type { RecentAcquisitionsContent } from "@/types/content";
 
-// Generic, unbranded imagery representing the kind of deal each slot is
-// reserved for — the dashed border and "Reserved" label keep it clear these
-// aren't photos of specific completed acquisitions.
-const placeholderImages = [
-  "/images/acquisition-handshake.jpg",
-  "/images/acquisition-contract.jpg",
-  "/images/acquisition-office.jpg",
-];
-
-export function RecentAcquisitions() {
+export function RecentAcquisitions({ content: recentAcquisitions }: { content: RecentAcquisitionsContent }) {
   const shouldReduceMotion = useReducedMotion();
+  const { placeholderImages } = recentAcquisitions;
 
   return (
     <section id="acquisitions" className="relative overflow-hidden py-24 md:py-32 bg-background-raised/40">

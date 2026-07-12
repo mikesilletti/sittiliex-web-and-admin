@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { Container } from "@/components/ui/Container";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
-import { ourPromise } from "@/content/site";
+import type { OurPromiseContent } from "@/types/content";
 
 function Word({
   progress,
@@ -53,7 +53,7 @@ function ScrubbedWords({
   );
 }
 
-export function OurPromise() {
+export function OurPromise({ content: ourPromise }: { content: OurPromiseContent }) {
   const shouldReduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({

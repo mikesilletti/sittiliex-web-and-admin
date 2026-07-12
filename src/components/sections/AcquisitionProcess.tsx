@@ -5,10 +5,11 @@ import Image from "next/image";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { Container } from "@/components/ui/Container";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
-import { processSteps } from "@/content/site";
+import type { AcquisitionProcessContent, ProcessStep } from "@/types/content";
 import { cn } from "@/lib/utils";
 
-export function AcquisitionProcess() {
+export function AcquisitionProcess({ content }: { content: AcquisitionProcessContent }) {
+  const { eyebrow, heading, body, image, imageAlt, steps: processSteps } = content;
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
@@ -30,7 +31,7 @@ export function AcquisitionProcess() {
     return (
       <section id="process" className="py-24 md:py-32">
         <Container>
-          <SectionIntro />
+          <SectionIntro eyebrow={eyebrow} heading={heading} body={body} />
           <div className="mt-16 max-w-2xl flex flex-col gap-10">
             {processSteps.map((step) => (
               <StepBlock key={step.id} step={step} active />
@@ -45,7 +46,7 @@ export function AcquisitionProcess() {
     <section id="process" ref={containerRef} className="relative" style={{ height: `${processSteps.length * 100}vh` }}>
       <div className="sticky top-0 h-screen flex items-center overflow-hidden py-24">
         <Container>
-          <SectionIntro />
+          <SectionIntro eyebrow={eyebrow} heading={heading} body={body} />
 
           <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             {/* Left: stepper */}
@@ -87,8 +88,8 @@ export function AcquisitionProcess() {
             {/* Right: supporting image, crossfades subtly with active step */}
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-border hidden lg:block">
               <Image
-                src="/images/process-meeting.jpg"
-                alt="Reviewing acquisition details"
+                src={image}
+                alt={imageAlt}
                 fill
                 sizes="40vw"
                 className="object-cover"
@@ -116,17 +117,14 @@ export function AcquisitionProcess() {
   );
 }
 
-function SectionIntro() {
+function SectionIntro({ eyebrow, heading, body }: { eyebrow: string; heading: string; body: string }) {
   return (
     <div className="max-w-2xl">
-      <p className="text-eyebrow uppercase text-accent mb-4">Our Acquisition Process</p>
+      <p className="text-eyebrow uppercase text-accent mb-4">{eyebrow}</p>
       <h2 className="text-display-sm md:text-display-md font-heading text-foreground text-balance">
-        We Move Fast.
+        {heading}
       </h2>
-      <p className="mt-4 text-body-lg text-foreground-muted text-balance">
-        Selling a business shouldn&apos;t take 12 months. Our acquisition process is designed to be
-        straightforward.
-      </p>
+      <p className="mt-4 text-body-lg text-foreground-muted text-balance">{body}</p>
     </div>
   );
 }
@@ -136,7 +134,7 @@ function StepBlock({
   active,
   dim,
 }: {
-  step: (typeof processSteps)[number];
+  step: ProcessStep;
   active: boolean;
   dim?: boolean;
 }) {

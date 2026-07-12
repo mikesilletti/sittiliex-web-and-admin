@@ -10,9 +10,10 @@ import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { SplitText } from "@/components/motion/SplitText";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
-import { hero } from "@/content/site";
+import type { HeroContent } from "@/types/content";
 
-export function Hero() {
+export function Hero({ content }: { content: HeroContent }) {
+  const hero = content;
   const shouldReduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -35,8 +36,8 @@ export function Hero() {
         style={shouldReduceMotion ? undefined : { scale: imageScale }}
       >
         <ParallaxImage
-          src="/images/hero-skyline.jpg"
-          alt=""
+          src={hero.backgroundImage}
+          alt={hero.backgroundImageAlt}
           className="absolute inset-0"
           imgClassName="opacity-80"
           strength={80}

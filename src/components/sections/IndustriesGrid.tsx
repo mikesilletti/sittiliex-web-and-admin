@@ -9,14 +9,14 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { Marquee } from "@/components/motion/Marquee";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
-import { industries, featuredIndustries, whatWeLookFor } from "@/content/site";
+import type { IndustriesGridContent, FeaturedIndustry } from "@/types/content";
 
-function IndustryTile({ industry }: { industry: (typeof featuredIndustries)[number] }) {
+function IndustryTile({ industry }: { industry: FeaturedIndustry }) {
   return (
     <div className="group relative aspect-[4/5] overflow-hidden rounded-md border border-border">
       <Image
         src={industry.image}
-        alt=""
+        alt={industry.alt}
         fill
         sizes="(min-width: 1024px) 32vw, (min-width: 640px) 45vw, 78vw"
         className="object-cover grayscale-[40%] transition-transform duration-700 ease-out group-hover:scale-110 group-hover:grayscale-0"
@@ -36,7 +36,8 @@ function IndustryTile({ industry }: { industry: (typeof featuredIndustries)[numb
   );
 }
 
-export function IndustriesGrid() {
+export function IndustriesGrid({ content }: { content: IndustriesGridContent }) {
+  const { eyebrow, heading, industries, featuredIndustries, whatWeLookForHeading, whatWeLookFor } = content;
   const half = Math.ceil(industries.length / 2);
   const rowA = industries.slice(0, half);
   const rowB = industries.slice(half);
@@ -78,7 +79,7 @@ export function IndustriesGrid() {
     <section id="industries" className="bg-background-raised/40 py-24 md:py-32">
       <RevealOnScroll>
         <Container>
-          <SectionHeading eyebrow="Industries We Acquire" heading="Businesses We Like." align="center" />
+          <SectionHeading eyebrow={eyebrow} heading={heading} align="center" />
         </Container>
       </RevealOnScroll>
 
@@ -137,7 +138,7 @@ export function IndustriesGrid() {
       <Container>
         <RevealOnScroll delay={0.2}>
           <div className="mx-auto mt-16 max-w-3xl rounded-lg border border-border bg-background p-8 md:p-10">
-            <h3 className="text-lg font-heading font-semibold text-foreground">What We Look For</h3>
+            <h3 className="text-lg font-heading font-semibold text-foreground">{whatWeLookForHeading}</h3>
             <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {whatWeLookFor.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-body-md text-foreground-muted">

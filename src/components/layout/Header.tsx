@@ -9,15 +9,21 @@ import { ButtonLink } from "@/components/ui/Button";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { useActiveSection } from "@/lib/use-active-section";
 import { cn } from "@/lib/utils";
-import { nav, hero } from "@/content/site";
+import type { NavItem } from "@/types/content";
 
-const navHrefs = nav.map((item) => item.href);
-
-export function Header() {
+export function Header({
+  nav,
+  ctaLabel,
+  ctaHref,
+}: {
+  nav: NavItem[];
+  ctaLabel: string;
+  ctaHref: string;
+}) {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const activeHref = useActiveSection(navHrefs);
+  const activeHref = useActiveSection(nav.map((item) => item.href));
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 24);
@@ -65,8 +71,8 @@ export function Header() {
 
         <div className="hidden lg:block">
           <MagneticButton strength={0.3}>
-            <ButtonLink href={hero.primaryCta.href} variant="primary" className="text-xs px-4 py-2.5">
-              {hero.primaryCta.label}
+            <ButtonLink href={ctaHref} variant="primary" className="text-xs px-4 py-2.5">
+              {ctaLabel}
             </ButtonLink>
           </MagneticButton>
         </div>
@@ -114,12 +120,12 @@ export function Header() {
                 </motion.a>
               ))}
               <ButtonLink
-                href={hero.primaryCta.href}
+                href={ctaHref}
                 variant="primary"
                 className="mt-3 w-full"
                 onClick={() => setMobileOpen(false)}
               >
-                {hero.primaryCta.label}
+                {ctaLabel}
               </ButtonLink>
             </Container>
           </motion.div>

@@ -26,3 +26,148 @@ export interface ValuePoint {
   title: string;
   description: string;
 }
+
+export interface CTAItem {
+  label: string;
+  href: string;
+}
+
+export interface FeaturedIndustry {
+  id: string;
+  name: string;
+  image: string;
+  alt: string;
+}
+
+// ── Per-section content shapes ──────────────────────────────────────────
+
+export interface HeroContent {
+  eyebrow: string;
+  headlineLines: { text: string; accent: boolean }[];
+  subhead: string;
+  primaryCta: CTAItem;
+  secondaryCta: CTAItem;
+  backgroundImage: string;
+  backgroundImageAlt: string;
+}
+
+export interface TrustStripContent {
+  badges: TrustBadge[];
+  marqueeItems: string[];
+}
+
+export interface WhySellToUsContent {
+  eyebrow: string;
+  heading: string;
+  intro: string;
+  image: string;
+  imageAlt: string;
+  points: ValuePoint[];
+}
+
+export interface OurPromiseContent {
+  eyebrow: string;
+  heading: string;
+  body: string;
+}
+
+export interface IndustriesGridContent {
+  eyebrow: string;
+  heading: string;
+  industries: string[];
+  featuredIndustries: FeaturedIndustry[];
+  whatWeLookForHeading: string;
+  whatWeLookFor: string[];
+}
+
+export interface AcquisitionProcessContent {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  image: string;
+  imageAlt: string;
+  steps: ProcessStep[];
+}
+
+export interface RecentAcquisitionsContent {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  cta: CTAItem;
+  placeholderImages: string[];
+}
+
+export interface FaqContent {
+  eyebrow: string;
+  heading: string;
+  items: FaqItem[];
+}
+
+export interface ContactContent {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  email: string;
+  backgroundImage: string;
+}
+
+export type SectionType =
+  | "hero"
+  | "trust-strip"
+  | "why-sell-to-us"
+  | "our-promise"
+  | "industries-grid"
+  | "acquisition-process"
+  | "recent-acquisitions"
+  | "faq"
+  | "contact";
+
+export interface SectionContentMap {
+  hero: HeroContent;
+  "trust-strip": TrustStripContent;
+  "why-sell-to-us": WhySellToUsContent;
+  "our-promise": OurPromiseContent;
+  "industries-grid": IndustriesGridContent;
+  "acquisition-process": AcquisitionProcessContent;
+  "recent-acquisitions": RecentAcquisitionsContent;
+  faq: FaqContent;
+  contact: ContactContent;
+}
+
+export interface SectionRow<T extends SectionType = SectionType> {
+  id: string;
+  type: T;
+  sort_order: number;
+  is_visible: boolean;
+  content: SectionContentMap[T];
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Global site settings (theme, SEO defaults, nav/footer/contact) ─────
+
+export interface SiteSettings {
+  id: number;
+  color_background: string;
+  color_background_raised: string;
+  color_background_overlay: string;
+  color_foreground: string;
+  color_foreground_muted: string;
+  color_foreground_subtle: string;
+  color_accent: string;
+  color_accent_hover: string;
+  color_border: string;
+  color_border_strong: string;
+  font_pairing_id: string;
+  seo_site_title: string;
+  seo_meta_description: string;
+  seo_og_image_url: string | null;
+  site_name: string;
+  contact_email: string;
+  nav_items: NavItem[];
+  header_cta_label: string;
+  header_cta_href: string;
+  footer_tagline: string;
+  footer_copyright: string;
+  updated_at: string;
+}
