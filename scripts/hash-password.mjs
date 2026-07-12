@@ -12,5 +12,11 @@ if (!password) {
 }
 
 const hash = bcrypt.hashSync(password, 10);
-console.log("\nAdd this to .env.local (and later, Vercel env vars):\n");
+// Next.js expands unescaped `$VAR` references in .env files, which corrupts
+// bcrypt hashes (they're full of `$2b$10$...`). Escape every `$` as `\$` when
+// writing to .env.local — Vercel's dashboard does NOT expand vars, so paste
+// the unescaped hash (without backslashes) there instead.
+console.log("\nAdd this to .env.local (backslashes escape Next.js's $VAR expansion):\n");
+console.log(`ADMIN_PASSWORD_HASH=${hash.replaceAll("$", "\\$")}\n`);
+console.log("For Vercel env vars, use the unescaped value instead:\n");
 console.log(`ADMIN_PASSWORD_HASH=${hash}\n`);
