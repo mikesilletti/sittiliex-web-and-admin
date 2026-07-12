@@ -35,9 +35,16 @@ export function LoadingScreen() {
       },
     });
 
+    // Safety net: requestAnimationFrame-driven animations can stall (a
+    // throttled/backgrounded tab, a slow device, a browser quirk), and
+    // onComplete above would then never fire, leaving this full-viewport
+    // overlay permanently blocking the site. Guarantee dismissal regardless.
+    const fallback = window.setTimeout(() => setVisible(false), 4000);
+
     return () => {
       controls.stop();
       unsubscribe();
+      window.clearTimeout(fallback);
     };
   }, [shouldReduceMotion, count]);
 
