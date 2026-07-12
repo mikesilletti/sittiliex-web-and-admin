@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
 import { RepeatableList } from "@/components/admin/RepeatableList";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
 import type { AcquisitionProcessContent, ProcessStep } from "@/types/content";
@@ -51,8 +52,8 @@ export function AcquisitionProcessForm({
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Image URL">
-          <Input value={state.image} onChange={(e) => update("image", e.target.value)} />
+        <Field label="Image">
+          <MediaUploadField value={state.image} onChange={(url) => update("image", url)} />
         </Field>
         <Field label="Image alt text">
           <Input value={state.imageAlt} onChange={(e) => update("imageAlt", e.target.value)} />

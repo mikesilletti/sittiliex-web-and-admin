@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
 import type { ContactContent } from "@/types/content";
@@ -38,10 +39,10 @@ export function ContactForm({ id, content }: { id: string; content: ContactConte
       <Field label="Contact email">
         <Input type="email" value={state.email} onChange={(e) => update("email", e.target.value)} />
       </Field>
-      <Field label="Background image URL">
-        <Input
+      <Field label="Background image">
+        <MediaUploadField
           value={state.backgroundImage}
-          onChange={(e) => update("backgroundImage", e.target.value)}
+          onChange={(url) => update("backgroundImage", url)}
         />
       </Field>
 

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
 import { RepeatableList } from "@/components/admin/RepeatableList";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
 import type { RecentAcquisitionsContent } from "@/types/content";
@@ -68,11 +69,11 @@ export function RecentAcquisitionsForm({
           createItem={() => ""}
           addLabel="+ Add image"
           renderItem={(item, index) => (
-            <Input
+            <MediaUploadField
               value={item}
-              onChange={(e) => {
+              onChange={(url) => {
                 const next = [...state.placeholderImages];
-                next[index] = e.target.value;
+                next[index] = url;
                 update("placeholderImages", next);
               }}
             />

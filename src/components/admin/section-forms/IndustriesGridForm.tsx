@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
 import { RepeatableList } from "@/components/admin/RepeatableList";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
 import type { IndustriesGridContent } from "@/types/content";
@@ -70,12 +71,12 @@ export function IndustriesGridForm({ id, content }: { id: string; content: Indus
                   update("featuredIndustries", next);
                 }}
               />
-              <Input
-                placeholder="Image URL"
+              <MediaUploadField
+                placeholder="Image"
                 value={item.image}
-                onChange={(e) => {
+                onChange={(url) => {
                   const next = [...state.featuredIndustries];
-                  next[index] = { ...next[index], image: e.target.value };
+                  next[index] = { ...next[index], image: url };
                   update("featuredIndustries", next);
                 }}
               />

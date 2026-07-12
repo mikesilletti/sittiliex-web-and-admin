@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
 import { RepeatableList } from "@/components/admin/RepeatableList";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
 import type { HeroContent } from "@/types/content";
@@ -95,10 +96,10 @@ export function HeroForm({ id, content }: { id: string; content: HeroContent }) 
         </Field>
       </div>
 
-      <Field label="Background image URL">
-        <Input
+      <Field label="Background image">
+        <MediaUploadField
           value={state.backgroundImage}
-          onChange={(e) => update("backgroundImage", e.target.value)}
+          onChange={(url) => update("backgroundImage", url)}
         />
       </Field>
       <Field label="Background image alt text" hint="Leave blank if purely decorative.">

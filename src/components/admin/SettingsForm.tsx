@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
 import { RepeatableList } from "@/components/admin/RepeatableList";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { saveSettings, type SettingsInput } from "@/lib/admin/settings-actions";
 
@@ -127,10 +128,10 @@ export function SettingsForm({ initial }: { initial: SettingsInput }) {
               onChange={(e) => update("seo_meta_description", e.target.value)}
             />
           </Field>
-          <Field label="OG image URL" hint="Shown when the site is shared on social media.">
-            <Input
+          <Field label="OG image" hint="Shown when the site is shared on social media.">
+            <MediaUploadField
               value={state.seo_og_image_url ?? ""}
-              onChange={(e) => update("seo_og_image_url", e.target.value || null)}
+              onChange={(url) => update("seo_og_image_url", url || null)}
             />
           </Field>
         </div>
