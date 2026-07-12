@@ -1,30 +1,12 @@
 import type { Metadata } from "next";
-import { cache } from "react";
 import { allFontVariableClassNames, getFontPairing } from "@/lib/fonts";
-import { getPublicSupabaseClient } from "@/lib/supabase/server";
-import type { SiteSettings } from "@/types/content";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
-import { CursorGlow } from "@/components/motion/CursorGlow";
-import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
-import { ScrollAscentRail } from "@/components/motion/ScrollAscentRail";
-import { LoadingScreen } from "@/components/motion/LoadingScreen";
-import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
+import { getSiteSettings } from "@/lib/site-settings";
 import "./globals.css";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 function safeHex(value: string | null | undefined, fallback: string) {
   return value && HEX.test(value) ? value : fallback;
 }
-
-// cache() dedupes this across generateMetadata() and RootLayout within the
-// same request, so the settings row is only fetched once per page load.
-const getSiteSettings = cache(async (): Promise<SiteSettings | null> => {
-  const supabase = getPublicSupabaseClient();
-  const { data } = await supabase.from("site_settings").select("*").eq("id", 1).single();
-  return data;
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -53,7 +35,6 @@ export default async function RootLayout({
 }>) {
   const settings = await getSiteSettings();
   const pairing = getFontPairing(settings?.font_pairing_id);
-  const nav = settings?.nav_items ?? [];
 
   const themeCss = `:root{
     --color-background:${safeHex(settings?.color_background, "#07090c")};
@@ -76,25 +57,7 @@ export default async function RootLayout({
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-body antialiased">
-        <LoadingScreen />
-        <NoiseOverlay />
-        <ScrollProgressBar />
-        <ScrollAscentRail nav={nav} />
-        <CursorGlow />
-        <SmoothScrollProvider>
-          <Header
-            nav={nav}
-            ctaLabel={settings?.header_cta_label ?? "Start a Confidential Conversation"}
-            ctaHref={settings?.header_cta_href ?? "#contact"}
-          />
-          {children}
-          <Footer
-            nav={nav}
-            tagline={settings?.footer_tagline ?? "Acquire. Build. Operate. Grow."}
-            copyright={settings?.footer_copyright ?? `© ${new Date().getFullYear()} SillettiX. All rights reserved.`}
-            contactEmail={settings?.contact_email ?? "hello@sillettix.com"}
-          />
-        </SmoothScrollProvider>
+        {children}
       </body>
     </html>
   );

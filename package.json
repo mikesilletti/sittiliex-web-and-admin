@@ -11,7 +11,8 @@
     "brand:optimize": "svgo -f public/brand -r --config svgo.config.mjs",
     "brand:favicons": "node scripts/generate-favicons.mjs",
     "brand:build": "npm run brand:crop && npm run brand:optimize && npm run brand:favicons",
-    "seed:cms": "node --env-file=.env.local scripts/seed-cms.mjs"
+    "seed:cms": "node --env-file=.env.local scripts/seed-cms.mjs",
+    "hash-password": "node scripts/hash-password.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
