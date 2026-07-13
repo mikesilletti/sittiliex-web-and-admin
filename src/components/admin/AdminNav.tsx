@@ -8,6 +8,7 @@ import { logoutAction } from "@/lib/admin/actions";
 const links = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/sections", label: "Sections" },
+  { href: "/admin/contacts", label: "Contacts" },
   { href: "/admin/theme", label: "Theme" },
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/seo", label: "SEO" },

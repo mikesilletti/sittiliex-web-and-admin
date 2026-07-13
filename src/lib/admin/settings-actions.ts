@@ -1,27 +1,43 @@
 "use server";
 
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth/require-admin";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
+import { themeSchema, settingsSchema, type ThemeInput, type SettingsInput } from "@/lib/admin/settings-schemas";
+import { snapshotSettings } from "@/lib/admin/versioning";
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a hex color like #1ab4ff");
+async function saveScope(
+  scope: "theme" | "settings",
+  parsedData: Record<string, unknown>
+): Promise<{ error: string | null }> {
+  const supabase = getAdminSupabaseClient();
 
-const themeSchema = z.object({
-  color_background: hexColor,
-  color_background_raised: hexColor,
-  color_background_overlay: hexColor,
-  color_foreground: hexColor,
-  color_foreground_muted: hexColor,
-  color_foreground_subtle: hexColor,
-  color_accent: hexColor,
-  color_accent_hover: hexColor,
-  color_border: hexColor,
-  color_border_strong: hexColor,
-  font_pairing_id: z.string().min(1),
-});
+  // Snapshot the current values for this scope before overwriting, so the
+  // save can be reverted from the History panel.
+  const { data: current, error: fetchError } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", 1)
+    .single();
+  if (fetchError || !current) {
+    return { error: fetchError?.message ?? "Settings row missing." };
+  }
+  const schema = scope === "theme" ? themeSchema : settingsSchema;
+  const currentScoped = schema.safeParse(current);
+  if (currentScoped.success) {
+    await snapshotSettings(supabase, scope, currentScoped.data);
+  }
 
-export type ThemeInput = z.infer<typeof themeSchema>;
+  const { error } = await supabase
+    .from("site_settings")
+    .update({ ...parsedData, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+  if (error) return { error: error.message };
+
+  revalidatePath("/");
+  revalidatePath(`/admin/${scope}`);
+  return { error: null };
+}
 
 export async function saveTheme(input: ThemeInput): Promise<{ error: string | null }> {
   await requireAdminSession();
@@ -31,29 +47,8 @@ export async function saveTheme(input: ThemeInput): Promise<{ error: string | nu
     return { error: parsed.error.issues[0]?.message ?? "Invalid theme values." };
   }
 
-  const supabase = getAdminSupabaseClient();
-  const { error } = await supabase.from("site_settings").update(parsed.data).eq("id", 1);
-  if (error) return { error: error.message };
-
-  revalidatePath("/");
-  revalidatePath("/admin/theme");
-  return { error: null };
+  return saveScope("theme", parsed.data);
 }
-
-const settingsSchema = z.object({
-  site_name: z.string().min(1),
-  contact_email: z.string().email(),
-  nav_items: z.array(z.object({ label: z.string().min(1), href: z.string().min(1) })),
-  header_cta_label: z.string().min(1),
-  header_cta_href: z.string().min(1),
-  footer_tagline: z.string(),
-  footer_copyright: z.string(),
-  seo_site_title: z.string().min(1),
-  seo_meta_description: z.string().min(1),
-  seo_og_image_url: z.string().nullable(),
-});
-
-export type SettingsInput = z.infer<typeof settingsSchema>;
 
 export async function saveSettings(input: SettingsInput): Promise<{ error: string | null }> {
   await requireAdminSession();
@@ -63,11 +58,5 @@ export async function saveSettings(input: SettingsInput): Promise<{ error: strin
     return { error: parsed.error.issues[0]?.message ?? "Invalid settings values." };
   }
 
-  const supabase = getAdminSupabaseClient();
-  const { error } = await supabase.from("site_settings").update(parsed.data).eq("id", 1);
-  if (error) return { error: error.message };
-
-  revalidatePath("/");
-  revalidatePath("/admin/settings");
-  return { error: null };
+  return saveScope("settings", parsed.data);
 }

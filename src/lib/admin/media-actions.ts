@@ -32,3 +32,25 @@ export async function uploadMedia(formData: FormData): Promise<{ url: string | n
   const { data } = supabase.storage.from("site-media").getPublicUrl(path);
   return { url: data.publicUrl, error: null };
 }
+
+export async function listMedia(): Promise<{
+  items: { url: string; name: string }[];
+  error: string | null;
+}> {
+  await requireAdminSession();
+  const supabase = getAdminSupabaseClient();
+
+  const { data, error } = await supabase.storage.from("site-media").list("", {
+    limit: 60,
+    sortBy: { column: "created_at", order: "desc" },
+  });
+  if (error) return { items: [], error: error.message };
+
+  const items = (data ?? [])
+    .filter((f) => f.name && !f.name.startsWith("."))
+    .map((f) => ({
+      url: supabase.storage.from("site-media").getPublicUrl(f.name).data.publicUrl,
+      name: f.name,
+    }));
+  return { items, error: null };
+}

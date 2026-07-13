@@ -3,7 +3,15 @@ import { notFound } from "next/navigation";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formRegistry } from "@/lib/admin/form-registry";
 import { sectionLabels } from "@/lib/section-registry";
-import type { SectionRow } from "@/types/content";
+import { restoreSectionVersion } from "@/lib/admin/version-actions";
+import { VersionHistory } from "@/components/admin/VersionHistory";
+import type { SectionRow, SectionVersion } from "@/types/content";
+
+const reasonLabels: Record<SectionVersion["reason"], string> = {
+  edit: "saved before an edit",
+  delete: "backup taken when deleted",
+  restore: "restored copy",
+};
 
 export default async function EditSectionPage({
   params,
@@ -26,6 +34,14 @@ export default async function EditSectionPage({
   const section = data as SectionRow;
   const Form = formRegistry[section.type];
 
+  const { data: versionRows } = await supabase
+    .from("section_versions")
+    .select("id, reason, created_at")
+    .eq("section_id", id)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const versions = (versionRows ?? []) as Pick<SectionVersion, "id" | "reason" | "created_at">[];
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       <Link href="/admin/sections" className="text-xs text-foreground-muted hover:text-foreground">
@@ -36,8 +52,21 @@ export default async function EditSectionPage({
       </h1>
 
       <div className="mt-8">
-        <Form id={section.id} content={section.content as never} />
+        {/* Key on updated_at: after a restore, router.refresh() must remount
+            the form so its local state picks up the restored content. */}
+        <Form key={section.updated_at} id={section.id} content={section.content as never} />
       </div>
+
+      <VersionHistory
+        heading="Version history"
+        description="Every save keeps a copy of what it replaced. Restoring saves the current state first, so you can always go back."
+        items={versions.map((v) => ({
+          id: v.id,
+          title: new Date(v.created_at).toLocaleString(),
+          detail: reasonLabels[v.reason],
+        }))}
+        restoreAction={restoreSectionVersion}
+      />
     </div>
   );
 }

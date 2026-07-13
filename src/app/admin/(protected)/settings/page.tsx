@@ -1,6 +1,8 @@
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { SettingsForm } from "@/components/admin/SettingsForm";
-import type { SiteSettings } from "@/types/content";
+import { VersionHistory } from "@/components/admin/VersionHistory";
+import { restoreSettingsVersion } from "@/lib/admin/version-actions";
+import type { SettingsVersion, SiteSettings } from "@/types/content";
 
 export default async function AdminSettingsPage() {
   const supabase = getAdminSupabaseClient();
@@ -9,6 +11,14 @@ export default async function AdminSettingsPage() {
     throw new Error(`Failed to load site settings: ${error?.message ?? "row missing"}`);
   }
   const settings = data as SiteSettings;
+
+  const { data: versionRows } = await supabase
+    .from("settings_versions")
+    .select("id, created_at")
+    .eq("scope", "settings")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const versions = (versionRows ?? []) as Pick<SettingsVersion, "id" | "created_at">[];
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -19,6 +29,7 @@ export default async function AdminSettingsPage() {
 
       <div className="mt-8">
         <SettingsForm
+          key={settings.updated_at}
           initial={{
             site_name: settings.site_name,
             contact_email: settings.contact_email,
@@ -33,6 +44,17 @@ export default async function AdminSettingsPage() {
           }}
         />
       </div>
+
+      <VersionHistory
+        heading="Settings history"
+        description="Each save keeps the previous values. Restoring saves the current settings first."
+        items={versions.map((v) => ({
+          id: v.id,
+          title: new Date(v.created_at).toLocaleString(),
+          detail: "previous settings",
+        }))}
+        restoreAction={restoreSettingsVersion}
+      />
     </div>
   );
 }

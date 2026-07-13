@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { SectionsList } from "@/components/admin/SectionsList";
-import type { SectionRow } from "@/types/content";
+import { VersionHistory } from "@/components/admin/VersionHistory";
+import { restoreSectionVersion } from "@/lib/admin/version-actions";
+import { sectionLabels } from "@/lib/section-registry";
+import type { SectionRow, SectionVersion } from "@/types/content";
 
 export default async function AdminSectionsPage() {
   const supabase = getAdminSupabaseClient();
@@ -13,6 +16,24 @@ export default async function AdminSectionsPage() {
   // empty state whenever the fetch transiently fails.
   if (error) throw new Error(`Failed to load sections: ${error.message}`);
   const sections = (data ?? []) as SectionRow[];
+
+  // Deleted sections that can still be restored: their delete-snapshots,
+  // newest per section, excluding any section that exists again.
+  const { data: deletedRows } = await supabase
+    .from("section_versions")
+    .select("id, section_id, type, created_at")
+    .eq("reason", "delete")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const liveIds = new Set(sections.map((s) => s.id));
+  const seen = new Set<string>();
+  const deleted = ((deletedRows ?? []) as Pick<SectionVersion, "id" | "section_id" | "type" | "created_at">[]).filter(
+    (v) => {
+      if (liveIds.has(v.section_id) || seen.has(v.section_id)) return false;
+      seen.add(v.section_id);
+      return true;
+    }
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -37,6 +58,20 @@ export default async function AdminSectionsPage() {
       <div className="mt-8">
         <SectionsList sections={sections} />
       </div>
+
+      {deleted.length > 0 && (
+        <VersionHistory
+          heading="Recently deleted"
+          description="Deleted sections keep a backup — restore brings them back at the bottom of the page."
+          items={deleted.map((v) => ({
+            id: v.id,
+            title: sectionLabels[v.type],
+            detail: `deleted ${new Date(v.created_at).toLocaleString()}`,
+          }))}
+          restoreAction={restoreSectionVersion}
+          buttonLabel="Restore section"
+        />
+      )}
     </div>
   );
 }

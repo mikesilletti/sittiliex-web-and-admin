@@ -171,3 +171,34 @@ export interface SiteSettings {
   footer_copyright: string;
   updated_at: string;
 }
+
+// ── Contact form submissions (public form → admin inbox) ───────────────
+
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  message: string;
+  created_at: string;
+}
+
+// ── Version history (snapshots taken before every overwrite/delete) ────
+
+export interface SectionVersion {
+  id: string;
+  section_id: string;
+  type: SectionType;
+  content: SectionContentMap[SectionType];
+  sort_order: number | null;
+  is_visible: boolean | null;
+  reason: "edit" | "delete" | "restore";
+  created_at: string;
+}
+
+export interface SettingsVersion {
+  id: string;
+  scope: "theme" | "settings";
+  data: Record<string, unknown>;
+  created_at: string;
+}

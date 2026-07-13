@@ -1,6 +1,8 @@
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { ThemeForm } from "@/components/admin/ThemeForm";
-import type { SiteSettings } from "@/types/content";
+import { VersionHistory } from "@/components/admin/VersionHistory";
+import { restoreSettingsVersion } from "@/lib/admin/version-actions";
+import type { SettingsVersion, SiteSettings } from "@/types/content";
 
 export default async function AdminThemePage() {
   const supabase = getAdminSupabaseClient();
@@ -9,6 +11,14 @@ export default async function AdminThemePage() {
     throw new Error(`Failed to load site settings: ${error?.message ?? "row missing"}`);
   }
   const settings = data as SiteSettings;
+
+  const { data: versionRows } = await supabase
+    .from("settings_versions")
+    .select("id, created_at")
+    .eq("scope", "theme")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const versions = (versionRows ?? []) as Pick<SettingsVersion, "id" | "created_at">[];
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -19,6 +29,7 @@ export default async function AdminThemePage() {
 
       <div className="mt-8">
         <ThemeForm
+          key={settings.updated_at}
           initial={{
             color_background: settings.color_background,
             color_background_raised: settings.color_background_raised,
@@ -34,6 +45,17 @@ export default async function AdminThemePage() {
           }}
         />
       </div>
+
+      <VersionHistory
+        heading="Theme history"
+        description="Each save keeps the previous colors and fonts. Restoring saves the current theme first."
+        items={versions.map((v) => ({
+          id: v.id,
+          title: new Date(v.created_at).toLocaleString(),
+          detail: "previous theme",
+        }))}
+        restoreAction={restoreSettingsVersion}
+      />
     </div>
   );
 }

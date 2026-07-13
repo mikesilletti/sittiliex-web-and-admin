@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { ColorInput } from "@/components/admin/ColorInput";
 import { SaveBar } from "@/components/admin/SaveBar";
 import { FONT_PAIRING_OPTIONS } from "@/lib/fonts-meta";
-import { saveTheme, type ThemeInput } from "@/lib/admin/settings-actions";
+import { saveTheme } from "@/lib/admin/settings-actions";
+import type { ThemeInput } from "@/lib/admin/settings-schemas";
 
 export function ThemeForm({ initial }: { initial: ThemeInput }) {
   const [state, setState] = useState(initial);

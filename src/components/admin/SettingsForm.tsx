@@ -6,7 +6,8 @@ import { SaveBar } from "@/components/admin/SaveBar";
 import { RepeatableList } from "@/components/admin/RepeatableList";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
-import { saveSettings, type SettingsInput } from "@/lib/admin/settings-actions";
+import { saveSettings } from "@/lib/admin/settings-actions";
+import type { SettingsInput } from "@/lib/admin/settings-schemas";
 
 export function SettingsForm({ initial }: { initial: SettingsInput }) {
   const [state, setState] = useState(initial);

@@ -6,7 +6,8 @@ import { requireAdminSession } from "@/lib/auth/require-admin";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { defaultContentFor } from "@/lib/admin/default-content";
 import { contentSchemaFor, sectionTypeSchema } from "@/lib/admin/content-schemas";
-import type { SectionContentMap, SectionType } from "@/types/content";
+import { snapshotSection } from "@/lib/admin/versioning";
+import type { SectionContentMap, SectionRow, SectionType } from "@/types/content";
 
 export async function reorderSections(orderedIds: string[]): Promise<{ error: string | null }> {
   await requireAdminSession();
@@ -38,6 +39,18 @@ export async function toggleSectionVisibility(id: string, isVisible: boolean): P
 export async function deleteSection(id: string): Promise<void> {
   await requireAdminSession();
   const supabase = getAdminSupabaseClient();
+
+  // The delete snapshot is the only path back for a deleted section, so a
+  // failed snapshot must abort the delete.
+  const { data: row, error: fetchError } = await supabase
+    .from("sections")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (fetchError || !row) throw new Error(fetchError?.message ?? "Section not found.");
+
+  const snapshot = await snapshotSection(supabase, row as SectionRow, "delete");
+  if (snapshot.error) throw new Error(`Couldn't back up the section: ${snapshot.error}`);
 
   const { error } = await supabase.from("sections").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -90,7 +103,7 @@ export async function updateSectionContent<T extends SectionType>(
   // so unknown keys are stripped and size bounds enforced.
   const { data: row, error: fetchError } = await supabase
     .from("sections")
-    .select("type")
+    .select("*")
     .eq("id", id)
     .single();
   if (fetchError || !row) return { error: "Section not found." };
@@ -100,7 +113,13 @@ export async function updateSectionContent<T extends SectionType>(
     return { error: parsed.error.issues[0]?.message ?? "Invalid content." };
   }
 
-  const { error } = await supabase.from("sections").update({ content: parsed.data }).eq("id", id);
+  // Best-effort snapshot of what's being overwritten, for the History panel.
+  await snapshotSection(supabase, row as SectionRow, "edit");
+
+  const { error } = await supabase
+    .from("sections")
+    .update({ content: parsed.data, updated_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) return { error: error.message };
 
   revalidatePath("/");
