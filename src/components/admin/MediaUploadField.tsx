@@ -30,16 +30,26 @@ export function MediaUploadField({
       setError("Only image files are supported.");
       return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB — try compressing it first.");
+      return;
+    }
 
     const formData = new FormData();
     formData.set("file", file);
 
     startTransition(async () => {
-      const result = await uploadMedia(formData);
-      if (result.error) {
-        setError(result.error);
-      } else if (result.url) {
-        onChange(result.url);
+      try {
+        const result = await uploadMedia(formData);
+        if (result.error) {
+          setError(result.error);
+        } else if (result.url) {
+          onChange(result.url);
+        }
+      } catch {
+        // e.g. the request was rejected before the action ran (body size
+        // limit, network drop) — surface it inline instead of crashing.
+        setError("Upload failed — check your connection and try again.");
       }
       if (fileInputRef.current) fileInputRef.current.value = "";
     });
