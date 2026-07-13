@@ -5,6 +5,7 @@ import { requireAdminSession } from "@/lib/auth/require-admin";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { themeSchema, settingsSchema, type ThemeInput, type SettingsInput } from "@/lib/admin/settings-schemas";
 import { snapshotSettings } from "@/lib/admin/versioning";
+import { DEFAULT_THEME } from "@/lib/default-theme";
 
 async function saveScope(
   scope: "theme" | "settings",
@@ -22,10 +23,15 @@ async function saveScope(
   if (fetchError || !current) {
     return { error: fetchError?.message ?? "Settings row missing." };
   }
+  // The snapshot is the undo path — if it can't be written, abort the save
+  // rather than overwrite values that could never be restored.
   const schema = scope === "theme" ? themeSchema : settingsSchema;
   const currentScoped = schema.safeParse(current);
   if (currentScoped.success) {
-    await snapshotSettings(supabase, scope, currentScoped.data);
+    const snapshot = await snapshotSettings(supabase, scope, currentScoped.data);
+    if (snapshot.error) {
+      return { error: `Couldn't back up the current ${scope} — nothing was saved. Try again.` };
+    }
   }
 
   const { error } = await supabase
@@ -59,4 +65,9 @@ export async function saveSettings(input: SettingsInput): Promise<{ error: strin
   }
 
   return saveScope("settings", parsed.data);
+}
+
+export async function resetThemeToDefaults(): Promise<{ error: string | null }> {
+  await requireAdminSession();
+  return saveScope("theme", DEFAULT_THEME);
 }

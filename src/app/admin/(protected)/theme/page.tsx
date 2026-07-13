@@ -1,5 +1,6 @@
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { ThemeForm } from "@/components/admin/ThemeForm";
+import { ResetThemeButton } from "@/components/admin/ResetThemeButton";
 import { VersionHistory } from "@/components/admin/VersionHistory";
 import { restoreSettingsVersion } from "@/lib/admin/version-actions";
 import type { SettingsVersion, SiteSettings } from "@/types/content";
@@ -14,11 +15,13 @@ export default async function AdminThemePage() {
 
   const { data: versionRows } = await supabase
     .from("settings_versions")
-    .select("id, created_at")
+    .select("id, created_at, data")
     .eq("scope", "theme")
     .order("created_at", { ascending: false })
     .limit(10);
-  const versions = (versionRows ?? []) as Pick<SettingsVersion, "id" | "created_at">[];
+  const versions = (versionRows ?? []) as Pick<SettingsVersion, "id" | "created_at" | "data">[];
+
+  const swatchKeys = ["color_background", "color_background_raised", "color_accent", "color_foreground"];
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -48,14 +51,19 @@ export default async function AdminThemePage() {
 
       <VersionHistory
         heading="Theme history"
-        description="Each save keeps the previous colors and fonts. Restoring saves the current theme first."
+        description="Each entry shows how the theme looked before a save — the swatches tell you which one you're going back to. Restoring saves the current theme first."
         items={versions.map((v) => ({
           id: v.id,
           title: new Date(v.created_at).toLocaleString(),
           detail: "previous theme",
+          swatches: swatchKeys.map((k) => String(v.data[k] ?? "#000000")),
         }))}
         restoreAction={restoreSettingsVersion}
       />
+
+      <div className="mt-6">
+        <ResetThemeButton />
+      </div>
     </div>
   );
 }

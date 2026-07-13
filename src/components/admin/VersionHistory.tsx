@@ -7,6 +7,9 @@ export interface VersionItem {
   id: string;
   title: string;
   detail: string;
+  /** Optional color swatches (hex values) shown beside the entry, so theme
+      snapshots are recognizable at a glance. */
+  swatches?: string[];
 }
 
 export function VersionHistory({
@@ -59,6 +62,18 @@ export function VersionHistory({
               key={item.id}
               className="flex items-center gap-3 rounded-md border border-border bg-background-raised px-3 py-2"
             >
+              {item.swatches && item.swatches.length > 0 && (
+                <div className="flex shrink-0 items-center gap-1">
+                  {item.swatches.map((hex, i) => (
+                    <span
+                      key={`${hex}-${i}`}
+                      title={hex}
+                      className="h-4 w-4 rounded-full border border-border-strong"
+                      style={{ backgroundColor: hex }}
+                    />
+                  ))}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="truncate text-xs text-foreground" suppressHydrationWarning>
                   {item.title}

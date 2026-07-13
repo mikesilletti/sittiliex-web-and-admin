@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { allFontVariableClassNames, getFontPairing } from "@/lib/fonts";
 import { getSiteSettings } from "@/lib/site-settings";
+import { DEFAULT_THEME } from "@/lib/default-theme";
 import "./globals.css";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -37,16 +38,16 @@ export default async function RootLayout({
   const pairing = getFontPairing(settings?.font_pairing_id);
 
   const themeCss = `:root{
-    --color-background:${safeHex(settings?.color_background, "#07090c")};
-    --color-background-raised:${safeHex(settings?.color_background_raised, "#0d1117")};
-    --color-background-overlay:${safeHex(settings?.color_background_overlay, "#11151b")};
-    --color-foreground:${safeHex(settings?.color_foreground, "#f4f6f8")};
-    --color-foreground-muted:${safeHex(settings?.color_foreground_muted, "#9aa4b2")};
-    --color-foreground-subtle:${safeHex(settings?.color_foreground_subtle, "#5c6675")};
-    --color-accent:${safeHex(settings?.color_accent, "#1ab4ff")};
-    --color-accent-hover:${safeHex(settings?.color_accent_hover, "#3fc2ff")};
-    --color-border:${safeHex(settings?.color_border, "#1e2530")};
-    --color-border-strong:${safeHex(settings?.color_border_strong, "#2a3340")};
+    --color-background:${safeHex(settings?.color_background, DEFAULT_THEME.color_background)};
+    --color-background-raised:${safeHex(settings?.color_background_raised, DEFAULT_THEME.color_background_raised)};
+    --color-background-overlay:${safeHex(settings?.color_background_overlay, DEFAULT_THEME.color_background_overlay)};
+    --color-foreground:${safeHex(settings?.color_foreground, DEFAULT_THEME.color_foreground)};
+    --color-foreground-muted:${safeHex(settings?.color_foreground_muted, DEFAULT_THEME.color_foreground_muted)};
+    --color-foreground-subtle:${safeHex(settings?.color_foreground_subtle, DEFAULT_THEME.color_foreground_subtle)};
+    --color-accent:${safeHex(settings?.color_accent, DEFAULT_THEME.color_accent)};
+    --color-accent-hover:${safeHex(settings?.color_accent_hover, DEFAULT_THEME.color_accent_hover)};
+    --color-border:${safeHex(settings?.color_border, DEFAULT_THEME.color_border)};
+    --color-border-strong:${safeHex(settings?.color_border_strong, DEFAULT_THEME.color_border_strong)};
     --font-heading:var(${pairing.headingVar}), ui-sans-serif, sans-serif;
     --font-body:var(${pairing.bodyVar}), ui-sans-serif, sans-serif;
   }`;
