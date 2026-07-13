@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/Input";
 import { uploadMedia } from "@/lib/admin/media-actions";
+import { isAllowedImagePath, IMAGE_PATH_HINT } from "@/lib/media";
 
 export function MediaUploadField({
   value,
@@ -57,6 +58,10 @@ export function MediaUploadField({
         onChange={handleFileSelect}
       />
       {error && <span className="text-xs text-red-400">{error}</span>}
+      {/* Advisory only — the server-side content schema is the enforcement. */}
+      {value && !isAllowedImagePath(value) && (
+        <span className="text-xs text-amber-400">{IMAGE_PATH_HINT}</span>
+      )}
       {value && (
         // eslint-disable-next-line @next/next/no-img-element -- admin-only preview of an arbitrary URL, not eligible for next/image's remotePatterns allowlist
         <img src={value} alt="" className="mt-1 h-20 w-auto rounded-sm border border-border object-cover" />

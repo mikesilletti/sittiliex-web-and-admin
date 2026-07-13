@@ -5,19 +5,23 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth/require-admin";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { defaultContentFor } from "@/lib/admin/default-content";
+import { contentSchemaFor, sectionTypeSchema } from "@/lib/admin/content-schemas";
 import type { SectionContentMap, SectionType } from "@/types/content";
 
-export async function reorderSections(orderedIds: string[]): Promise<void> {
+export async function reorderSections(orderedIds: string[]): Promise<{ error: string | null }> {
   await requireAdminSession();
   const supabase = getAdminSupabaseClient();
 
-  await Promise.all(
-    orderedIds.map((id, index) =>
-      supabase.from("sections").update({ sort_order: index }).eq("id", id)
-    )
-  );
+  // Single atomic UPDATE via RPC. An upsert can't do this: NOT NULL checks
+  // run on the insert tuple BEFORE conflict arbitration, so a partial-column
+  // upsert of (id, sort_order) fails on `type` even for existing rows.
+  // Unknown ids simply match nothing — no junk rows possible.
+  const { error } = await supabase.rpc("reorder_sections", { ids: orderedIds });
+  if (error) return { error: error.message };
 
   revalidatePath("/");
+  revalidatePath("/admin/sections");
+  return { error: null };
 }
 
 export async function toggleSectionVisibility(id: string, isVisible: boolean): Promise<void> {
@@ -28,6 +32,7 @@ export async function toggleSectionVisibility(id: string, isVisible: boolean): P
   if (error) throw new Error(error.message);
 
   revalidatePath("/");
+  revalidatePath("/admin/sections");
 }
 
 export async function deleteSection(id: string): Promise<void> {
@@ -43,6 +48,10 @@ export async function deleteSection(id: string): Promise<void> {
 
 export async function createSection(type: SectionType): Promise<never> {
   await requireAdminSession();
+
+  const parsedType = sectionTypeSchema.safeParse(type);
+  if (!parsedType.success) throw new Error("Invalid section type.");
+
   const supabase = getAdminSupabaseClient();
 
   const { data: existing } = await supabase
@@ -56,10 +65,10 @@ export async function createSection(type: SectionType): Promise<never> {
   const { data, error } = await supabase
     .from("sections")
     .insert({
-      type,
+      type: parsedType.data,
       sort_order: nextSortOrder,
       is_visible: true,
-      content: defaultContentFor(type),
+      content: defaultContentFor(parsedType.data),
     })
     .select("id")
     .single();
@@ -76,7 +85,22 @@ export async function updateSectionContent<T extends SectionType>(
   await requireAdminSession();
   const supabase = getAdminSupabaseClient();
 
-  const { error } = await supabase.from("sections").update({ content }).eq("id", id);
+  // Validate against the schema for the row's STORED type (can't be spoofed
+  // by the caller). parsed.data — not the raw input — is what gets written,
+  // so unknown keys are stripped and size bounds enforced.
+  const { data: row, error: fetchError } = await supabase
+    .from("sections")
+    .select("type")
+    .eq("id", id)
+    .single();
+  if (fetchError || !row) return { error: "Section not found." };
+
+  const parsed = contentSchemaFor(row.type as SectionType).safeParse(content);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid content." };
+  }
+
+  const { error } = await supabase.from("sections").update({ content: parsed.data }).eq("id", id);
   if (error) return { error: error.message };
 
   revalidatePath("/");

@@ -94,6 +94,7 @@ function SectionRowItem({
 
 export function SectionsList({ sections: initialSections }: { sections: SectionRow[] }) {
   const [sections, setSections] = useState(initialSections);
+  const [reorderError, setReorderError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -106,11 +107,18 @@ export function SectionsList({ sections: initialSections }: { sections: SectionR
 
     const oldIndex = sections.findIndex((s) => s.id === active.id);
     const newIndex = sections.findIndex((s) => s.id === over.id);
+    const previous = sections;
     const reordered = arrayMove(sections, oldIndex, newIndex);
     setSections(reordered);
+    setReorderError(null);
 
-    startTransition(() => {
-      reorderSections(reordered.map((s) => s.id));
+    startTransition(async () => {
+      const result = await reorderSections(reordered.map((s) => s.id));
+      if (result.error) {
+        // Persist failed — undo the optimistic reorder so the list doesn't lie.
+        setSections(previous);
+        setReorderError("Couldn't save the new order. Please try again.");
+      }
     });
   }
 
@@ -139,6 +147,7 @@ export function SectionsList({ sections: initialSections }: { sections: SectionR
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      {reorderError && <p className="mb-3 text-xs text-red-400">{reorderError}</p>}
       <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2">
           {sections.map((section) => (

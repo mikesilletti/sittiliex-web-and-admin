@@ -12,8 +12,13 @@ export default async function EditSectionPage({
 }) {
   const { id } = await params;
   const supabase = getAdminSupabaseClient();
-  const { data } = await supabase.from("sections").select("*").eq("id", id).single();
+  const { data, error } = await supabase.from("sections").select("*").eq("id", id).single();
 
+  // PGRST116 = no matching row → a real 404. Anything else is a fetch
+  // failure and must not masquerade as "section doesn't exist".
+  if (error && error.code !== "PGRST116") {
+    throw new Error(`Failed to load section: ${error.message}`);
+  }
   if (!data) {
     notFound();
   }

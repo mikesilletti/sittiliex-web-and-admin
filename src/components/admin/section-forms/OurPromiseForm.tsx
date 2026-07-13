@@ -11,10 +11,12 @@ export function OurPromiseForm({ id, content }: { id: string; content: OurPromis
   const [state, setState] = useState(content);
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function save() {
     startTransition(async () => {
       const result = await updateSectionContent(id, state);
+      setSaveError(result.error);
       setStatus(result.error ? "error" : "saved");
     });
   }
@@ -36,7 +38,7 @@ export function OurPromiseForm({ id, content }: { id: string; content: OurPromis
         <Textarea value={state.body} onChange={(e) => update("body", e.target.value)} />
       </Field>
 
-      <SaveBar isPending={isPending} status={status} onSave={save} />
+      <SaveBar isPending={isPending} status={status} onSave={save} errorMessage={saveError} />
     </div>
   );
 }

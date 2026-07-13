@@ -4,7 +4,10 @@ import type { SiteSettings } from "@/types/content";
 
 export default async function AdminThemePage() {
   const supabase = getAdminSupabaseClient();
-  const { data } = await supabase.from("site_settings").select("*").eq("id", 1).single();
+  const { data, error } = await supabase.from("site_settings").select("*").eq("id", 1).single();
+  if (error || !data) {
+    throw new Error(`Failed to load site settings: ${error?.message ?? "row missing"}`);
+  }
   const settings = data as SiteSettings;
 
   return (

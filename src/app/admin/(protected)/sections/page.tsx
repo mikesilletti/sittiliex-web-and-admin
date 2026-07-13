@@ -5,7 +5,13 @@ import type { SectionRow } from "@/types/content";
 
 export default async function AdminSectionsPage() {
   const supabase = getAdminSupabaseClient();
-  const { data } = await supabase.from("sections").select("*").order("sort_order", { ascending: true });
+  const { data, error } = await supabase
+    .from("sections")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  // Fail loudly: swallowing the error here shows a false "No sections yet"
+  // empty state whenever the fetch transiently fails.
+  if (error) throw new Error(`Failed to load sections: ${error.message}`);
   const sections = (data ?? []) as SectionRow[];
 
   return (
