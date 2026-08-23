@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import { Ban, Clock, Mail, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
@@ -10,6 +9,7 @@ import { SplitText } from "@/components/motion/SplitText";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ChatWidgetPrompt } from "@/components/sms/ChatWidgetPrompt";
+import { SmsChatWidget } from "@/components/sms/SmsChatWidget";
 import { COMPANY } from "@/lib/company";
 
 export const metadata: Metadata = {
@@ -256,13 +256,7 @@ export default function SmsPage() {
         live widget matches the carrier application — do not hand-roll a
         replacement, and never add another phone-number field to this page.
       */}
-      <Script
-        src="https://widgets.leadconnectorhq.com/loader.js"
-        data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-        data-widget-id="6a4181e0cf2c64bbfaae4ef2"
-        data-source="WEB_USER"
-        strategy="afterInteractive"
-      />
+      <SmsChatWidget />
     </>
   );
 }
