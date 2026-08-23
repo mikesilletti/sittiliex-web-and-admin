@@ -10,6 +10,7 @@ import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { contactSchema } from "@/lib/contact-schema";
+import { COMPANY } from "@/lib/company";
 import type { ContactContent } from "@/types/content";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -106,16 +107,29 @@ export function Contact({ content: contact }: { content: ContactContent }) {
               <p className="mt-4 text-body-lg text-foreground-muted text-balance">{contact.body}</p>
             </RevealOnScroll>
             <RevealOnScroll delay={0.15}>
-              <div className="mt-8 text-sm text-foreground-muted">
-                Prefer email?{" "}
-                <MagneticButton strength={0.25} className="inline-block">
-                  <a
-                    href={`mailto:${contact.email}`}
-                    className="focus-ring rounded-sm text-accent hover:text-accent-hover"
-                  >
-                    {contact.email}
-                  </a>
-                </MagneticButton>
+              <div className="mt-8 flex flex-col gap-2 text-sm text-foreground-muted">
+                <div>
+                  Prefer email?{" "}
+                  <MagneticButton strength={0.25} className="inline-block">
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="focus-ring rounded-sm text-accent hover:text-accent-hover"
+                    >
+                      {contact.email}
+                    </a>
+                  </MagneticButton>
+                </div>
+                <div>
+                  Rather talk?{" "}
+                  <MagneticButton strength={0.25} className="inline-block">
+                    <a
+                      href={COMPANY.phoneHref}
+                      className="focus-ring rounded-sm text-accent hover:text-accent-hover"
+                    >
+                      {COMPANY.phone}
+                    </a>
+                  </MagneticButton>
+                </div>
               </div>
             </RevealOnScroll>
           </div>

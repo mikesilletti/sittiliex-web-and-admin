@@ -1,4 +1,5 @@
 import { getSiteSettings } from "@/lib/site-settings";
+import { COMPANY } from "@/lib/company";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
@@ -30,7 +31,9 @@ export default async function MarketingLayout({ children }: { children: React.Re
           nav={nav}
           tagline={settings?.footer_tagline ?? "Acquire. Build. Operate. Grow."}
           copyright={settings?.footer_copyright ?? `© ${new Date().getFullYear()} SillettiX. All rights reserved.`}
-          contactEmail={settings?.contact_email ?? "hello@sillettix.com"}
+          contactEmail={settings?.contact_email ?? COMPANY.email}
+          contactPhone={COMPANY.phone}
+          contactPhoneHref={COMPANY.phoneHref}
         />
       </SmoothScrollProvider>
     </>

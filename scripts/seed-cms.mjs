@@ -38,7 +38,7 @@ const siteSettings = {
     "SillettiX is a permanent-capital holding company acquiring profitable, founder-led businesses and operating them for decades — not private equity, not a broker.",
   seo_og_image_url: null,
   site_name: "SillettiX",
-  contact_email: "Deals@sillettix.com",
+  contact_email: "mike@sillettix.com",
   nav_items: [
     { label: "Why SillettiX", href: "#why-us" },
     { label: "Industries", href: "#industries" },
@@ -278,7 +278,7 @@ const sections = [
       eyebrow: "Let's Start the Conversation",
       heading: "Ready to Talk About Your Next Chapter?",
       body: "If you've been thinking about selling your business — whether next month or five years from now — we'd love to connect. Every conversation is completely confidential, with no pressure and no obligation.",
-      email: "Deals@sillettix.com",
+      email: "mike@sillettix.com",
       backgroundImage: "/images/contact-office.jpg",
     },
   },
