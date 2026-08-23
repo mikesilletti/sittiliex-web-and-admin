@@ -6,7 +6,11 @@ export function useActiveSection(hrefs: string[]) {
   const [activeHref, setActiveHref] = useState<string | null>(null);
 
   useEffect(() => {
+    // Only in-page anchors name a section to observe. Nav items are CMS-authored
+    // and can point at a route ("/sms"), which is not a valid CSS selector —
+    // passing one to querySelector throws and takes the whole effect with it.
     const sections = hrefs
+      .filter((href) => href.startsWith("#") && href.length > 1)
       .map((href) => document.querySelector(href))
       .filter((el): el is Element => el !== null);
 

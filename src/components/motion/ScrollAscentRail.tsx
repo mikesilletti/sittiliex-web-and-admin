@@ -22,6 +22,7 @@ export function ScrollAscentRail({ nav }: { nav: NavItem[] }) {
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight <= 0) return;
       const next = nav
+        .filter((item) => item.href.startsWith("#") && item.href.length > 1)
         .map((item) => {
           const el = document.querySelector(item.href);
           if (!el) return null;
