@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { deleteContactSubmission } from "@/lib/admin/contact-actions";
+import { useContactNotifications } from "@/components/admin/notifications/ContactNotifications";
 import type { ContactSubmission } from "@/types/content";
 
 function downloadFile(filename: string, mimeType: string, content: string) {
@@ -57,6 +58,14 @@ export function ContactsList({ submissions: initial }: { submissions: ContactSub
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const { markContactsSeen } = useContactNotifications();
+
+  useEffect(() => {
+    markContactsSeen();
+    // Runs once per mount (visiting the page is what clears the badge) —
+    // markContactsSeen is a stable useCallback, safe to omit otherwise.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleDelete(id: string) {
     if (!confirm("Delete this submission? This cannot be undone.")) return;

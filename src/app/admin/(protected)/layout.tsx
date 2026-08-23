@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { ContactNotificationsProvider } from "@/components/admin/notifications/ContactNotifications";
 
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
@@ -16,9 +17,11 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <AdminNav />
-      {children}
-    </div>
+    <ContactNotificationsProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <AdminNav />
+        {children}
+      </div>
+    </ContactNotificationsProvider>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/lib/admin/actions";
+import { useContactNotifications } from "@/components/admin/notifications/ContactNotifications";
 
 const links = [
   { href: "/admin", label: "Dashboard" },
@@ -16,6 +17,7 @@ const links = [
 
 export function AdminNav() {
   const pathname = usePathname();
+  const { unreadCount } = useContactNotifications();
 
   return (
     <div className="border-b border-border">
@@ -23,16 +25,22 @@ export function AdminNav() {
         <nav className="flex items-center gap-1">
           {links.map((link) => {
             const active = link.href === "/admin" ? pathname === link.href : pathname.startsWith(link.href);
+            const showBadge = link.href === "/admin/contacts" && unreadCount > 0;
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "focus-ring rounded-sm px-3 py-1.5 text-sm transition-colors",
+                  "focus-ring relative rounded-sm px-3 py-1.5 text-sm transition-colors",
                   active ? "text-accent" : "text-foreground-muted hover:text-foreground"
                 )}
               >
                 {link.label}
+                {showBadge && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-background">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
