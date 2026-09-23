@@ -6,6 +6,19 @@ import type { AcquisitionTile, ContactContent, RecentAcquisitionsContent } from 
 
 export const HERO_SCROLL_LABEL_DEFAULT = "Scroll";
 
+export const PORTFOLIO_NEXT_DEFAULTS = {
+  nextEyebrow: "Next chapter",
+  nextHeading: "Your business?",
+  nextBody: "We're actively acquiring home services businesses.",
+} as const;
+
+export const PORTFOLIO_STATUS_LABELS = {
+  founded: "Founded",
+  acquired: "Acquired",
+  "in-progress": "In Progress",
+  confidential: "Confidential",
+} as const;
+
 export const CONTACT_COPY_DEFAULTS = {
   emailLabel: "Prefer email?",
   phoneLabel: "Rather talk?",

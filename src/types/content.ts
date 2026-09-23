@@ -93,12 +93,17 @@ export interface AcquisitionProcessContent {
   steps: ProcessStep[];
 }
 
+export type PortfolioStatus = "founded" | "acquired" | "in-progress" | "confidential";
+
 export interface AcquisitionTile {
   id: string;
   name: string;
+  /** One-line description shown under the name. */
   subtitle: string;
   image: string;
   alt: string;
+  /** Badge above the name; absent/blank shows no badge. */
+  status?: PortfolioStatus | "";
 }
 
 export interface RecentAcquisitionsContent {
@@ -110,6 +115,10 @@ export interface RecentAcquisitionsContent {
   tiles?: AcquisitionTile[];
   /** Legacy image-only tiles; read as a fallback when `tiles` is absent. */
   placeholderImages?: string[];
+  /** Final "next chapter" card; its link uses `cta`. Blank falls back to defaults. */
+  nextEyebrow?: string;
+  nextHeading?: string;
+  nextBody?: string;
 }
 
 export interface FaqContent {

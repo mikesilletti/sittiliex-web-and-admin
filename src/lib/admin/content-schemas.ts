@@ -74,10 +74,22 @@ const recentAcquisitionsSchema = z.object({
   body: long,
   cta,
   tiles: z
-    .array(z.object({ id: short, name: short, subtitle: short, image: imagePath, alt: short }))
+    .array(
+      z.object({
+        id: short,
+        name: short,
+        subtitle: short,
+        image: imagePath,
+        alt: short,
+        status: z.enum(["founded", "acquired", "in-progress", "confidential", ""]).optional(),
+      })
+    )
     .max(50)
     .optional(),
   placeholderImages: z.array(imagePath).max(50).optional(),
+  nextEyebrow: short.optional(),
+  nextHeading: short.optional(),
+  nextBody: long.optional(),
 });
 
 const faqSchema = z.object({
