@@ -1,5 +1,5 @@
 import { getSiteSettings } from "@/lib/site-settings";
-import { COMPANY } from "@/lib/company";
+import { COMPANY, toTelHref } from "@/lib/company";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
@@ -12,6 +12,9 @@ import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 export default async function MarketingLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
   const nav = settings?.nav_items ?? [];
+  // Falls back to the constant while contact_phone is blank — or absent, on a
+  // database that predates the column.
+  const contactPhone = settings?.contact_phone || COMPANY.phone;
 
   return (
     <>
@@ -31,9 +34,9 @@ export default async function MarketingLayout({ children }: { children: React.Re
           nav={nav}
           tagline={settings?.footer_tagline ?? "Acquire. Build. Operate. Grow."}
           copyright={settings?.footer_copyright ?? `© ${new Date().getFullYear()} SillettiX. All rights reserved.`}
-          contactEmail={settings?.contact_email ?? COMPANY.email}
-          contactPhone={COMPANY.phone}
-          contactPhoneHref={COMPANY.phoneHref}
+          contactEmail={settings?.contact_email || COMPANY.email}
+          contactPhone={contactPhone}
+          contactPhoneHref={toTelHref(contactPhone)}
         />
       </SmoothScrollProvider>
     </>

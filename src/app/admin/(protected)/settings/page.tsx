@@ -1,4 +1,5 @@
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
+import { COMPANY } from "@/lib/company";
 import { SettingsForm } from "@/components/admin/SettingsForm";
 import { VersionHistory } from "@/components/admin/VersionHistory";
 import { restoreSettingsVersion } from "@/lib/admin/version-actions";
@@ -24,7 +25,7 @@ export default async function AdminSettingsPage() {
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="text-display-sm font-heading text-foreground">Settings</h1>
       <p className="mt-1 text-body-sm text-foreground-muted">
-        Navigation, footer, contact email, and SEO defaults.
+        Navigation, footer, contact details, and SEO defaults.
       </p>
 
       <div className="mt-8">
@@ -33,6 +34,7 @@ export default async function AdminSettingsPage() {
           initial={{
             site_name: settings.site_name,
             contact_email: settings.contact_email,
+            contact_phone: settings.contact_phone || COMPANY.phone,
             nav_items: settings.nav_items,
             header_cta_label: settings.header_cta_label,
             header_cta_href: settings.header_cta_href,

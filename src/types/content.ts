@@ -108,6 +108,8 @@ export interface ContactContent {
   heading: string;
   body: string;
   email: string;
+  /** Optional: sections saved before the field existed have no phone. */
+  phone?: string;
   backgroundImage: string;
 }
 
@@ -164,6 +166,8 @@ export interface SiteSettings {
   seo_og_image_url: string | null;
   site_name: string;
   contact_email: string;
+  /** Nullable/absent until the contact_phone column exists; renders fall back to COMPANY.phone. */
+  contact_phone: string | null;
   nav_items: NavItem[];
   header_cta_label: string;
   header_cta_href: string;

@@ -41,6 +41,13 @@ export function ContactForm({ id, content }: { id: string; content: ContactConte
       <Field label="Contact email">
         <Input type="email" value={state.email} onChange={(e) => update("email", e.target.value)} />
       </Field>
+      <Field label="Contact phone">
+        <Input
+          type="tel"
+          value={state.phone ?? ""}
+          onChange={(e) => update("phone", e.target.value)}
+        />
+      </Field>
       <Field label="Background image">
         <MediaUploadField
           value={state.backgroundImage}

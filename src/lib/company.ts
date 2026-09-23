@@ -18,5 +18,18 @@ export const COMPANY = {
   site: "https://www.sillettix.com",
 } as const;
 
+/**
+ * Turn a display phone number into a tel: href. Admin-entered numbers arrive
+ * in whatever shape someone typed, so normalise to digits and assume US when
+ * no country code is given.
+ */
+export function toTelHref(phone: string): string {
+  const trimmed = phone.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  if (!digits) return COMPANY.phoneHref;
+  if (trimmed.startsWith("+")) return `tel:+${digits}`;
+  return `tel:+${digits.length === 10 ? "1" : ""}${digits}`;
+}
+
 /** Last-updated stamp shown on /privacy and /terms. */
 export const LEGAL_LAST_UPDATED = "August 23, 2026";

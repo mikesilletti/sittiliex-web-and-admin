@@ -24,7 +24,11 @@ export type ThemeInput = z.infer<typeof themeSchema>;
 
 export const settingsSchema = z.object({
   site_name: z.string().min(1),
+  // Blank is allowed and falls back to COMPANY.phone when rendered. It also
+  // keeps settings snapshots taken before this field existed restorable —
+  // restoreSettingsVersion re-validates them against this schema.
   contact_email: z.string().email(),
+  contact_phone: z.string().max(50).default(""),
   nav_items: z.array(z.object({ label: z.string().min(1), href: z.string().min(1) })),
   header_cta_label: z.string().min(1),
   header_cta_href: z.string().min(1),

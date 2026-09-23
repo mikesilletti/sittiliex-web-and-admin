@@ -39,6 +39,7 @@ const siteSettings = {
   seo_og_image_url: null,
   site_name: "SillettiX",
   contact_email: "mike@sillettix.com",
+  contact_phone: "551-305-4030",
   nav_items: [
     { label: "Why SillettiX", href: "#why-us" },
     { label: "Industries", href: "#industries" },
@@ -279,6 +280,7 @@ const sections = [
       heading: "Ready to Talk About Your Next Chapter?",
       body: "If you've been thinking about selling your business — whether next month or five years from now — we'd love to connect. Every conversation is completely confidential, with no pressure and no obligation.",
       email: "mike@sillettix.com",
+      phone: "551-305-4030",
       backgroundImage: "/images/contact-office.jpg",
     },
   },

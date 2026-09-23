@@ -41,6 +41,16 @@ export function SettingsForm({ initial }: { initial: SettingsInput }) {
               onChange={(e) => update("contact_email", e.target.value)}
             />
           </Field>
+          <Field
+            label="Contact phone"
+            hint="Shown in the site footer. If left blank, the number registered with the SMS carriers is used."
+          >
+            <Input
+              type="tel"
+              value={state.contact_phone}
+              onChange={(e) => update("contact_phone", e.target.value)}
+            />
+          </Field>
         </div>
       </div>
 

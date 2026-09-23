@@ -86,6 +86,7 @@ const contactSchema = z.object({
   heading: short,
   body: long,
   email: emailOrBlank,
+  phone: short.default(""),
   backgroundImage: imagePath,
 });
 

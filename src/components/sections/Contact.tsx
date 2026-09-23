@@ -10,7 +10,7 @@ import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { contactSchema } from "@/lib/contact-schema";
-import { COMPANY } from "@/lib/company";
+import { COMPANY, toTelHref } from "@/lib/company";
 import type { ContactContent } from "@/types/content";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -19,6 +19,7 @@ export function Contact({ content: contact }: { content: ContactContent }) {
   const [values, setValues] = useState({ name: "", email: "", company: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>("idle");
+  const phone = contact.phone || COMPANY.phone;
 
   function handleChange(field: keyof typeof values) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -123,10 +124,10 @@ export function Contact({ content: contact }: { content: ContactContent }) {
                   Rather talk?{" "}
                   <MagneticButton strength={0.25} className="inline-block">
                     <a
-                      href={COMPANY.phoneHref}
+                      href={toTelHref(phone)}
                       className="focus-ring rounded-sm text-accent hover:text-accent-hover"
                     >
-                      {COMPANY.phone}
+                      {phone}
                     </a>
                   </MagneticButton>
                 </div>
