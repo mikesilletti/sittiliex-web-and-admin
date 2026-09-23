@@ -217,6 +217,9 @@ export interface ContactSubmission {
   /** Path-specific answers keyed as in contact-schema's DETAIL_LABELS. */
   details: Record<string, string>;
   sms_consent: boolean;
+  /** Set once the lead reached GoHighLevel; ghl_error explains a failed/partial sync. */
+  ghl_contact_id: string | null;
+  ghl_error: string | null;
   created_at: string;
 }
 

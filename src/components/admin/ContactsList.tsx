@@ -214,7 +214,18 @@ export function ContactsList({ submissions: initial }: { submissions: ContactSub
                   {s.message && <p className="whitespace-pre-wrap text-sm text-foreground-muted">{s.message}</p>}
                   <p className="mt-2 text-[11px] text-foreground-subtle">
                     SMS consent: {s.sms_consent ? "Yes" : "No"}
+                    {" · "}
+                    {s.ghl_contact_id ? (
+                      <span className={s.ghl_error ? "text-amber-400" : "text-emerald-400"}>
+                        {s.ghl_error ? "In GoHighLevel (with warnings)" : "Sent to GoHighLevel"}
+                      </span>
+                    ) : s.ghl_error ? (
+                      <span className="text-red-400">Not sent to GoHighLevel</span>
+                    ) : (
+                      "GoHighLevel: —"
+                    )}
                   </p>
+                  {s.ghl_error && <p className="mt-1 break-words text-[11px] text-foreground-subtle">{s.ghl_error}</p>}
                   <a
                     href={`mailto:${s.email}?subject=${encodeURIComponent("Re: your SillettiX inquiry")}`}
                     className="focus-ring mt-3 inline-block rounded-sm text-xs text-accent hover:text-accent-hover"
