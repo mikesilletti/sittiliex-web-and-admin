@@ -7,7 +7,7 @@ import { RepeatableList } from "@/components/admin/RepeatableList";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
-import type { IndustriesGridContent } from "@/types/content";
+import type { FeaturedIndustry, IndustriesGridContent } from "@/types/content";
 
 export function IndustriesGridForm({ id, content }: { id: string; content: IndustriesGridContent }) {
   const [state, setState] = useState(content);
@@ -60,7 +60,7 @@ export function IndustriesGridForm({ id, content }: { id: string; content: Indus
         <RepeatableList
           items={state.featuredIndustries}
           onChange={(next) => update("featuredIndustries", next)}
-          createItem={() => ({ id: crypto.randomUUID(), name: "", image: "", alt: "" })}
+          createItem={(): FeaturedIndustry => ({ id: crypto.randomUUID(), name: "", description: "", image: "", alt: "" })}
           addLabel="+ Add featured industry"
           renderItem={(item, index) => (
             <div className="flex flex-col gap-2">
