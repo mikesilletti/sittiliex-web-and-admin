@@ -12,9 +12,9 @@ export const COMPANY = {
    * what the carrier application says. Set to null to hide the footer line.
    */
   legalEntity: "Silletti Ventures LLC" as string | null,
-  email: "mike@sillettix.com",
-  phone: "551-305-4030",
-  phoneHref: "tel:+15513054030",
+  email: "deals@sillettix.com",
+  phone: "+15515255019",
+  phoneHref: "tel:+15515255019",
   site: "https://www.sillettix.com",
 } as const;
 
