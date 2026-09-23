@@ -86,6 +86,25 @@ function noteBody(values: InquiryValues): string | null {
   return lines.join("\n");
 }
 
+/** Same matching GHL uses for dedupe: email first, then phone. */
+async function findExistingContact(
+  token: string,
+  locationId: string,
+  email: string,
+  phone: string | undefined
+): Promise<string | null> {
+  const lookups = [`email=${encodeURIComponent(email)}`, ...(phone ? [`number=${encodeURIComponent(phone)}`] : [])];
+  for (const q of lookups) {
+    const res = await ghl<{ contact?: { id: string } | null }>(
+      token,
+      "GET",
+      `/contacts/search/duplicate?locationId=${locationId}&${q}`
+    );
+    if (res.contact?.id) return res.contact.id;
+  }
+  return null;
+}
+
 export async function syncInquiryToGhl(values: InquiryValues): Promise<GhlSyncResult> {
   const cfg = config();
   if (!cfg) return { contactId: null, error: "GHL not configured" };
@@ -104,25 +123,39 @@ export async function syncInquiryToGhl(values: InquiryValues): Promise<GhlSyncRe
         ]
       : [];
 
+  const tags = [`website-${values.type}`, ...(values.smsConsent ? ["website-sms-opt-in"] : [])];
+  const phone = values.phone ? toE164(values.phone) : undefined;
+  const contactFields = {
+    ...splitName(values.name),
+    email: values.email,
+    ...(phone ? { phone } : {}),
+    ...(values.company ? { companyName: values.company } : {}),
+    ...(customFields.length ? { customFields } : {}),
+  };
+
   try {
-    // Upsert without tags: GHL's upsert overwrites the tag list, which would
-    // strip tags from an existing contact. Tags are added separately below.
-    const upsert = await ghl<{ contact?: { id: string } }>(token, "POST", "/contacts/upsert", {
-      locationId,
-      ...splitName(values.name),
-      email: values.email,
-      ...(values.phone ? { phone: toE164(values.phone) } : {}),
-      ...(values.company ? { companyName: values.company } : {}),
-      source: SOURCE,
-      ...(customFields.length ? { customFields } : {}),
-    });
-    const contactId = upsert.contact?.id;
-    if (!contactId) throw new Error("GHL upsert returned no contact id");
-
     const problems: string[] = [];
-    const tags = [`website-${values.type}`, ...(values.smsConsent ? ["website-sms-opt-in"] : [])];
+    const existingId = await findExistingContact(token, locationId, values.email, phone);
+    let contactId: string;
 
-    await ghl(token, "POST", `/contacts/${contactId}/tags`, { tags }).catch((e: Error) => problems.push(e.message));
+    if (existingId) {
+      // Update without tags (a tags array here would replace the contact's
+      // existing tags), then add ours on top.
+      await ghl(token, "PUT", `/contacts/${existingId}`, contactFields);
+      contactId = existingId;
+      await ghl(token, "POST", `/contacts/${contactId}/tags`, { tags }).catch((e: Error) => problems.push(e.message));
+    } else {
+      // New contacts are created with their tags already on, so GHL workflows
+      // triggered by "Contact Created" can filter on website-partner / -other.
+      const created = await ghl<{ contact?: { id: string } }>(token, "POST", "/contacts/", {
+        locationId,
+        ...contactFields,
+        source: SOURCE,
+        tags,
+      });
+      if (!created.contact?.id) throw new Error("GHL create returned no contact id");
+      contactId = created.contact.id;
+    }
 
     const note = noteBody(values);
     if (note) {
