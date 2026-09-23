@@ -207,10 +207,16 @@ export interface SiteSettings {
 
 export interface ContactSubmission {
   id: string;
+  /** "sell" | "partner" | "other"; rows from the old single-path form are "general". */
+  inquiry_type: string;
   name: string;
   email: string;
+  phone: string | null;
   company: string | null;
   message: string;
+  /** Path-specific answers keyed as in contact-schema's DETAIL_LABELS. */
+  details: Record<string, string>;
+  sms_consent: boolean;
   created_at: string;
 }
 

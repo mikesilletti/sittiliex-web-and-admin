@@ -3,6 +3,12 @@
 import { useEffect, useState, useTransition } from "react";
 import { deleteContactSubmission } from "@/lib/admin/contact-actions";
 import { useContactNotifications } from "@/components/admin/notifications/ContactNotifications";
+import {
+  DETAIL_LABELS,
+  INQUIRY_TYPE_LABELS,
+  detailValueLabel,
+  type InquiryType,
+} from "@/lib/contact-schema";
 import type { ContactSubmission } from "@/types/content";
 
 function downloadFile(filename: string, mimeType: string, content: string) {
@@ -19,10 +25,38 @@ function csvEscape(value: string) {
   return `"${value.replace(/"/g, '""')}"`;
 }
 
+const DETAIL_KEYS = Object.keys(DETAIL_LABELS);
+
+function typeLabel(type: string) {
+  return INQUIRY_TYPE_LABELS[type as InquiryType] ?? "General inquiry";
+}
+
 function toCsv(rows: ContactSubmission[]) {
-  const header = "Name,Email,Company,Message,Submitted";
+  const header = [
+    "Type",
+    "Name",
+    "Email",
+    "Phone",
+    "Company",
+    ...DETAIL_KEYS.map((k) => DETAIL_LABELS[k]),
+    "Message",
+    "SMS consent",
+    "Submitted",
+  ]
+    .map(csvEscape)
+    .join(",");
   const lines = rows.map((r) =>
-    [r.name, r.email, r.company ?? "", r.message, new Date(r.created_at).toISOString()]
+    [
+      typeLabel(r.inquiry_type),
+      r.name,
+      r.email,
+      r.phone ?? "",
+      r.company ?? "",
+      ...DETAIL_KEYS.map((k) => (r.details?.[k] ? detailValueLabel(k, r.details[k]) : "")),
+      r.message,
+      r.sms_consent ? "Yes" : "No",
+      new Date(r.created_at).toISOString(),
+    ]
       .map(csvEscape)
       .join(",")
   );
@@ -42,6 +76,7 @@ function toVCard(r: ContactSubmission) {
     `FN:${r.name}`,
     `N:;${r.name};;;`,
     `EMAIL;TYPE=INTERNET:${r.email}`,
+    ...(r.phone ? [`TEL;TYPE=CELL:${r.phone}`] : []),
     ...(r.company ? [`ORG:${r.company}`] : []),
     `NOTE:${note}`,
     "END:VCARD",
@@ -127,13 +162,23 @@ export function ContactsList({ submissions: initial }: { submissions: ContactSub
                   className="focus-ring flex-1 min-w-0 rounded-sm text-left"
                 >
                   <p className="truncate text-sm font-medium text-foreground">
+                    <span
+                      className={
+                        s.inquiry_type === "sell"
+                          ? "mr-2 rounded-sm bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent"
+                          : "mr-2 rounded-sm bg-foreground/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground-muted"
+                      }
+                    >
+                      {typeLabel(s.inquiry_type)}
+                    </span>
                     {s.name}
                     {s.company && (
                       <span className="ml-2 font-normal text-foreground-subtle">{s.company}</span>
                     )}
                   </p>
                   <p className="mt-0.5 truncate text-xs text-foreground-muted" suppressHydrationWarning>
-                    {s.email} · {new Date(s.created_at).toLocaleString()}
+                    {s.email}
+                    {s.phone && ` · ${s.phone}`} · {new Date(s.created_at).toLocaleString()}
                   </p>
                 </button>
 
@@ -156,7 +201,20 @@ export function ContactsList({ submissions: initial }: { submissions: ContactSub
 
               {expanded && (
                 <div className="mt-3 border-t border-border pt-3">
-                  <p className="whitespace-pre-wrap text-sm text-foreground-muted">{s.message}</p>
+                  {Object.keys(s.details ?? {}).length > 0 && (
+                    <dl className="mb-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+                      {DETAIL_KEYS.filter((k) => s.details[k]).map((k) => (
+                        <div key={k}>
+                          <dt className="text-[11px] text-foreground-subtle">{DETAIL_LABELS[k]}</dt>
+                          <dd className="text-sm text-foreground">{detailValueLabel(k, s.details[k])}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {s.message && <p className="whitespace-pre-wrap text-sm text-foreground-muted">{s.message}</p>}
+                  <p className="mt-2 text-[11px] text-foreground-subtle">
+                    SMS consent: {s.sms_consent ? "Yes" : "No"}
+                  </p>
                   <a
                     href={`mailto:${s.email}?subject=${encodeURIComponent("Re: your SillettiX inquiry")}`}
                     className="focus-ring mt-3 inline-block rounded-sm text-xs text-accent hover:text-accent-hover"

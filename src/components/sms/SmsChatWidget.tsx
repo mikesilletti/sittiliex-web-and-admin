@@ -11,10 +11,10 @@ const WIDGET_ID = "6a4181e0cf2c64bbfaae4ef2";
  * rather than a plain <Script> — removes it again on unmount.
  *
  * The loader appends a <chat-widget> element to <body>, outside the React
- * tree. Leaving /sms through a client-side navigation tears down the route but
- * not that element, so the launcher stayed pinned to the corner of the
- * homepage. Carrier review expects the widget on /sms only, so it has to go
- * when the route does.
+ * tree, so a client-side navigation tears down the route but not that element.
+ * It's mounted by both the marketing layout (homepage launcher) and /sms (the
+ * A2P opt-in page carriers review); removing it on unmount keeps exactly one
+ * launcher on screen when moving between them.
  *
  * Only the DOM the widget renders is cleaned up. The library <script> tags it
  * adds to <head> are left alone: once a script has executed, removing its tag

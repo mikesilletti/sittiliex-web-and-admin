@@ -1,80 +1,21 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Input, Textarea } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
-import { contactSchema } from "@/lib/contact-schema";
+import { InquiryForm } from "@/components/sections/InquiryForm";
 import { COMPANY, toTelHref } from "@/lib/company";
-import { contactCopy, type ContactCopyKey } from "@/lib/content-defaults";
+import { CONTACT_COPY_DEFAULTS, contactCopy, type ContactCopyKey } from "@/lib/content-defaults";
 import type { ContactContent } from "@/types/content";
 
-type Status = "idle" | "submitting" | "success" | "error";
-
 export function Contact({ content: contact }: { content: ContactContent }) {
-  const [values, setValues] = useState({ name: "", email: "", company: "", message: "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<Status>("idle");
   const phone = contact.phone || COMPANY.phone;
   const copy = (key: ContactCopyKey) => contactCopy(contact, key);
-
-  function handleChange(field: keyof typeof values) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setValues((v) => ({ ...v, [field]: e.target.value }));
-    };
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    const result = contactSchema.safeParse(values);
-
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const [key, msgs] of Object.entries(result.error.flatten().fieldErrors)) {
-        if (msgs?.[0]) fieldErrors[key] = msgs[0];
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-    setStatus("submitting");
-
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result.data),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      setStatus("success");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  if (status === "success") {
-    return (
-      <section id="contact" className="py-24 md:py-32">
-        <Container>
-          <RevealOnScroll>
-            <div className="mx-auto max-w-lg rounded-lg border border-accent/30 bg-background-raised p-10 text-center">
-              <CheckCircle2 size={32} className="mx-auto text-accent" />
-              <h3 className="mt-4 text-lg font-heading font-semibold text-foreground">
-                {copy("successHeading")}
-              </h3>
-              <p className="mt-2 text-body-md text-foreground-muted">{copy("successMessage")}</p>
-            </div>
-          </RevealOnScroll>
-        </Container>
-      </section>
-    );
-  }
+  const formCopy = Object.fromEntries(
+    Object.keys(CONTACT_COPY_DEFAULTS).map((key) => [key, copy(key as ContactCopyKey)])
+  ) as Record<ContactCopyKey, string>;
 
   return (
     <section id="contact" className="relative py-24 md:py-32 overflow-hidden">
@@ -94,8 +35,8 @@ export function Contact({ content: contact }: { content: ContactContent }) {
         }}
       />
       <Container className="relative">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          <div className="max-w-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-12 lg:gap-16 items-start">
+          <div className="max-w-2xl lg:sticky lg:top-28">
             <RevealOnScroll>
               <p className="text-eyebrow uppercase text-accent mb-4">{contact.eyebrow}</p>
             </RevealOnScroll>
@@ -136,73 +77,7 @@ export function Contact({ content: contact }: { content: ContactContent }) {
           </div>
 
           <RevealOnScroll delay={0.1}>
-            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-              <div>
-                <Input
-                  placeholder={copy("namePlaceholder")}
-                  aria-label={copy("namePlaceholder")}
-                  value={values.name}
-                  onChange={handleChange("name")}
-                  aria-invalid={!!errors.name}
-                  aria-describedby={errors.name ? "error-name" : undefined}
-                />
-                {errors.name && (
-                  <p id="error-name" className="mt-1.5 text-xs text-red-400">
-                    {errors.name}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Input
-                  type="email"
-                  placeholder={copy("emailPlaceholder")}
-                  aria-label={copy("emailPlaceholder")}
-                  value={values.email}
-                  onChange={handleChange("email")}
-                  aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? "error-email" : undefined}
-                />
-                {errors.email && (
-                  <p id="error-email" className="mt-1.5 text-xs text-red-400">
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              <Input
-                placeholder={copy("companyPlaceholder")}
-                aria-label={copy("companyPlaceholder")}
-                value={values.company}
-                onChange={handleChange("company")}
-              />
-
-              <div>
-                <Textarea
-                  placeholder={copy("messagePlaceholder")}
-                  aria-label={copy("messagePlaceholder")}
-                  value={values.message}
-                  onChange={handleChange("message")}
-                  aria-invalid={!!errors.message}
-                  aria-describedby={errors.message ? "error-message" : undefined}
-                />
-                {errors.message && (
-                  <p id="error-message" className="mt-1.5 text-xs text-red-400">
-                    {errors.message}
-                  </p>
-                )}
-              </div>
-
-              <MagneticButton strength={0.2} className="mt-2 w-full">
-                <Button type="submit" variant="primary" disabled={status === "submitting"} className="w-full">
-                  {status === "submitting" ? copy("submittingLabel") : copy("submitLabel")}
-                </Button>
-              </MagneticButton>
-
-              {status === "error" && (
-                <p className="text-xs text-red-400">{copy("errorMessage")}</p>
-              )}
-            </form>
+            <InquiryForm copy={formCopy} />
           </RevealOnScroll>
         </div>
       </Container>

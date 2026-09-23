@@ -8,6 +8,7 @@ import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
 import { ScrollAscentRail } from "@/components/motion/ScrollAscentRail";
 import { LoadingScreen } from "@/components/motion/LoadingScreen";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
+import { SmsChatWidget } from "@/components/sms/SmsChatWidget";
 
 export default async function MarketingLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
@@ -39,6 +40,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
           contactPhoneHref={toTelHref(contactPhone)}
         />
       </SmoothScrollProvider>
+      <SmsChatWidget />
     </>
   );
 }
