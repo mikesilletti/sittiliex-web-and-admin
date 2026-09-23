@@ -234,7 +234,7 @@ export function InquiryForm({ copy }: { copy: InquiryFormCopy }) {
                 <ChoiceSelect {...field("timing")} options={TIMING_OPTIONS} placeholder="Select a timeframe" />
               </Field>
               <Field label="Ideal sale price" error={errors.askingPrice} id={`${formId}-askingPrice`} required>
-                <Input {...field("askingPrice")} placeholder={'e.g. $1.5M, or "Need an appraisal"'} />
+                <Input {...field("askingPrice")} inputMode="decimal" placeholder="e.g. $1,500,000" />
               </Field>
               <Field label="Anything else we should know?" error={errors.message} id={`${formId}-message`} wide>
                 <Textarea {...field("message")} className="min-h-24" placeholder="Reason for selling, number of employees, real estate included…" />

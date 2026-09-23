@@ -115,7 +115,7 @@ export const sellSchema = z.object({
   revenue: oneOf(REVENUE_OPTIONS, "Please choose a revenue range"),
   profit: oneOf(PROFIT_OPTIONS, "Please choose a profit range"),
   timing: oneOf(TIMING_OPTIONS, "Please choose a timeframe"),
-  askingPrice: required("Please enter a price, or \"Need an appraisal\""),
+  askingPrice: required("Please enter your ideal sale price"),
   message: text(5000).default(""),
 });
 
