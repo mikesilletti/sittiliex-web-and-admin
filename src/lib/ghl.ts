@@ -17,6 +17,13 @@ const FIELD_IDS = {
   profit: "sYDlwDtCWs2S8PxfkIAl", // Annual Profit
   timing: "FJ4N0gAzHSYLYU76BTtA", // Timeline to Sell
   askingPrice: "l8Jvrz6GOtP9ZQ8mQAwI", // Asking Price
+  // "Website …" fields, filled for every website lead regardless of path.
+  webInquiryType: "bRTrSA3j4LcavXOmsCuK", // Website Inquiry Type
+  webPartnerType: "Y2ZVKXtfjlFB2zMMjfjD", // Website Partner Type
+  webLinkedin: "sptkUSA3BlDEiEaab8eV", // Website LinkedIn / Site
+  webMessage: "CSQZomgK2GSHeW9k4sdY", // Website Message
+  webSmsConsent: "z7mbViif9thx9CcAWesp", // Website SMS Consent
+  webSubmittedAt: "Tl31H88ssImtNRJdxNj5", // Website Submitted At
 } as const;
 
 /** Seller leads open a deal here. */
@@ -110,7 +117,24 @@ export async function syncInquiryToGhl(values: InquiryValues): Promise<GhlSyncRe
   if (!cfg) return { contactId: null, error: "GHL not configured" };
   const { token, locationId } = cfg;
 
-  const customFields =
+  const submittedAt = new Date().toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const websiteFields = [
+    { id: FIELD_IDS.webInquiryType, field_value: INQUIRY_TYPE_LABELS[values.type] },
+    { id: FIELD_IDS.webMessage, field_value: values.message || "" },
+    { id: FIELD_IDS.webSmsConsent, field_value: values.smsConsent ? "Yes" : "No" },
+    { id: FIELD_IDS.webSubmittedAt, field_value: `${submittedAt} ET` },
+    ...(values.type === "partner"
+      ? [
+          { id: FIELD_IDS.webPartnerType, field_value: detailValueLabel("partnerType", values.partnerType) },
+          { id: FIELD_IDS.webLinkedin, field_value: values.linkedin },
+        ]
+      : []),
+  ];
+  const sellerFields =
     values.type === "sell"
       ? [
           { id: FIELD_IDS.industry, field_value: values.industry },
@@ -122,6 +146,7 @@ export async function syncInquiryToGhl(values: InquiryValues): Promise<GhlSyncRe
           { id: FIELD_IDS.askingPrice, field_value: values.askingPrice },
         ]
       : [];
+  const customFields = [...sellerFields, ...websiteFields];
 
   const tags = [`website-${values.type}`, ...(values.smsConsent ? ["website-sms-opt-in"] : [])];
   const phone = values.phone ? toE164(values.phone) : undefined;

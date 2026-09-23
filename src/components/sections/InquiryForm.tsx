@@ -280,7 +280,7 @@ export function InquiryForm({ copy }: { copy: InquiryFormCopy }) {
           className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-accent)]"
         />
         <span>
-          Optional: I agree to receive text messages from SillettiX about my inquiry at the number above. Message
+          I agree to receive text messages from SillettiX about my inquiry at the number above. Message
           frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a
           condition of any purchase or sale. See our{" "}
           <Link href="/privacy" className="text-foreground-muted underline hover:text-foreground">Privacy Policy</Link> and{" "}
