@@ -29,9 +29,12 @@ function IndustryTile({ industry }: { industry: FeaturedIndustry }) {
         aria-hidden="true"
         className="absolute inset-0 bg-accent/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
       />
-      <span className="absolute bottom-4 left-4 right-4 translate-y-1 text-sm font-heading font-semibold text-foreground transition-transform duration-500 group-hover:translate-y-0">
-        {industry.name}
-      </span>
+      <div className="absolute bottom-4 left-4 right-4 translate-y-1 transition-transform duration-500 group-hover:translate-y-0">
+        <span className="block text-base font-heading font-semibold text-foreground">{industry.name}</span>
+        {industry.description && (
+          <span className="mt-1 block text-xs text-foreground-muted">{industry.description}</span>
+        )}
+      </div>
     </div>
   );
 }

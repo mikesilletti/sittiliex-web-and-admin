@@ -35,6 +35,8 @@ export interface CTAItem {
 export interface FeaturedIndustry {
   id: string;
   name: string;
+  /** Optional one-liner under the name, e.g. what makes this business attractive. */
+  description?: string;
   image: string;
   alt: string;
 }

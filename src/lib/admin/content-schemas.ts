@@ -51,7 +51,7 @@ const industriesGridSchema = z.object({
   heading: short,
   industries: z.array(short).max(50),
   featuredIndustries: z
-    .array(z.object({ id: short, name: short, image: imagePath, alt: short }))
+    .array(z.object({ id: short, name: short, description: short.optional(), image: imagePath, alt: short }))
     .max(50),
   whatWeLookForHeading: short,
   whatWeLookFor: z.array(short).max(50),

@@ -73,6 +73,15 @@ export function IndustriesGridForm({ id, content }: { id: string; content: Indus
                   update("featuredIndustries", next);
                 }}
               />
+              <Input
+                placeholder="Short description (optional)"
+                value={item.description ?? ""}
+                onChange={(e) => {
+                  const next = [...state.featuredIndustries];
+                  next[index] = { ...next[index], description: e.target.value };
+                  update("featuredIndustries", next);
+                }}
+              />
               <MediaUploadField
                 placeholder="Image"
                 value={item.image}
