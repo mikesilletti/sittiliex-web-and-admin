@@ -13,7 +13,7 @@ export const COMPANY = {
    */
   legalEntity: "Silletti Ventures LLC" as string | null,
   email: "deals@sillettix.com",
-  phone: "+15515255019",
+  phone: "+1 551-525-5019",
   phoneHref: "tel:+15515255019",
   site: "https://www.sillettix.com",
 } as const;

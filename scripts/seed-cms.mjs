@@ -39,7 +39,7 @@ const siteSettings = {
   seo_og_image_url: null,
   site_name: "SillettiX",
   contact_email: "deals@sillettix.com",
-  contact_phone: "+15515255019",
+  contact_phone: "+1 551-525-5019",
   nav_items: [
     { label: "Why SillettiX", href: "#why-us" },
     { label: "Industries", href: "#industries" },
@@ -280,7 +280,7 @@ const sections = [
       heading: "Ready to Talk About Your Next Chapter?",
       body: "If you've been thinking about selling your business — whether next month or five years from now — we'd love to connect. Every conversation is completely confidential, with no pressure and no obligation.",
       email: "deals@sillettix.com",
-      phone: "+15515255019",
+      phone: "+1 551-525-5019",
       backgroundImage: "/images/contact-office.jpg",
     },
   },
