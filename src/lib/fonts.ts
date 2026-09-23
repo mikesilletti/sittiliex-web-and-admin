@@ -9,6 +9,7 @@ import {
   Archivo,
   IBM_Plex_Sans,
   Fraunces,
+  Outfit,
 } from "next/font/google";
 
 // All fonts are loaded at build time (required by next/font's static
@@ -75,6 +76,12 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   display: "swap",
 });
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-outfit",
+  display: "swap",
+});
 
 export const FONT_PAIRINGS = {
   "space-grotesk-inter": {
@@ -107,12 +114,25 @@ export const FONT_PAIRINGS = {
     headingVar: "--font-fraunces",
     bodyVar: "--font-inter",
   },
-} as const;
+  "outfit-inter": {
+    label: "Outfit Extra Bold / Inter",
+    headingVar: "--font-outfit",
+    bodyVar: "--font-inter",
+    // Display headings (text-display-*) render at this weight; other
+    // pairings keep the 600 default from globals.css.
+    displayWeight: 800,
+  },
+} as const satisfies Record<
+  string,
+  { label: string; headingVar: string; bodyVar: string; displayWeight?: number }
+>;
 
 export type FontPairingId = keyof typeof FONT_PAIRINGS;
 export const DEFAULT_FONT_PAIRING_ID: FontPairingId = "space-grotesk-inter";
 
-export function getFontPairing(id: string | null | undefined) {
+type FontPairing = { label: string; headingVar: string; bodyVar: string; displayWeight?: number };
+
+export function getFontPairing(id: string | null | undefined): FontPairing {
   return FONT_PAIRINGS[id as FontPairingId] ?? FONT_PAIRINGS[DEFAULT_FONT_PAIRING_ID];
 }
 
@@ -127,6 +147,7 @@ export const allFontVariableClassNames = [
   archivo,
   ibmPlexSans,
   fraunces,
+  outfit,
 ]
   .map((f) => f.variable)
   .join(" ");

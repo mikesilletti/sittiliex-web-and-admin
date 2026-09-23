@@ -50,6 +50,7 @@ export default async function RootLayout({
     --color-border-strong:${safeHex(settings?.color_border_strong, DEFAULT_THEME.color_border_strong)};
     --font-heading:var(${pairing.headingVar}), ui-sans-serif, sans-serif;
     --font-body:var(${pairing.bodyVar}), ui-sans-serif, sans-serif;
+    --font-heading-display-weight:${pairing.displayWeight ?? 600};
   }`;
 
   return (

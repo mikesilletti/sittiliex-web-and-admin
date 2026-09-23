@@ -8,4 +8,5 @@ export const FONT_PAIRING_OPTIONS = [
   { id: "sora-worksans", label: "Sora / Work Sans" },
   { id: "archivo-ibmplex", label: "Archivo / IBM Plex Sans" },
   { id: "fraunces-inter", label: "Fraunces / Inter" },
+  { id: "outfit-inter", label: "Outfit Extra Bold / Inter" },
 ] as const;

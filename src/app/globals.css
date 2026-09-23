@@ -27,17 +27,17 @@
   --text-display-lg: clamp(2rem, 7vw + 0.5rem, 5.5rem);
   --text-display-lg--line-height: 1.02;
   --text-display-lg--letter-spacing: -0.02em;
-  --text-display-lg--font-weight: 600;
+  --text-display-lg--font-weight: var(--font-heading-display-weight, 600);
 
   --text-display-md: clamp(2.25rem, 3.5vw + 1rem, 3.75rem);
   --text-display-md--line-height: 1.05;
   --text-display-md--letter-spacing: -0.015em;
-  --text-display-md--font-weight: 600;
+  --text-display-md--font-weight: var(--font-heading-display-weight, 600);
 
   --text-display-sm: clamp(1.75rem, 2vw + 1rem, 2.5rem);
   --text-display-sm--line-height: 1.1;
   --text-display-sm--letter-spacing: -0.01em;
-  --text-display-sm--font-weight: 600;
+  --text-display-sm--font-weight: var(--font-heading-display-weight, 600);
 
   --text-eyebrow: 0.8125rem;
   --text-eyebrow--line-height: 1;
