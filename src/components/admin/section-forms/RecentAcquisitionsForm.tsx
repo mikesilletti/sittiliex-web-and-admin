@@ -7,7 +7,8 @@ import { RepeatableList } from "@/components/admin/RepeatableList";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
-import type { RecentAcquisitionsContent } from "@/types/content";
+import { acquisitionTiles } from "@/lib/content-defaults";
+import type { AcquisitionTile, RecentAcquisitionsContent } from "@/types/content";
 
 export function RecentAcquisitionsForm({
   id,
@@ -23,7 +24,12 @@ export function RecentAcquisitionsForm({
 
   function save() {
     startTransition(async () => {
-      const result = await updateSectionContent(id, state);
+      // Always persist explicit tiles so legacy sections migrate on first save.
+      const result = await updateSectionContent(id, {
+        ...state,
+        tiles: acquisitionTiles(state),
+        placeholderImages: undefined,
+      });
       setSaveError(result.error);
       setStatus(result.error ? "error" : "saved");
     });
@@ -34,6 +40,14 @@ export function RecentAcquisitionsForm({
     value: RecentAcquisitionsContent[K]
   ) {
     setState((prev) => ({ ...prev, [key]: value }));
+    setStatus("idle");
+  }
+
+  const tiles = acquisitionTiles(state);
+
+  // Saving tiles supersedes the legacy image-only list.
+  function updateTiles(next: AcquisitionTile[]) {
+    setState((prev) => ({ ...prev, tiles: next, placeholderImages: undefined }));
     setStatus("idle");
   }
 
@@ -64,22 +78,31 @@ export function RecentAcquisitionsForm({
         </Field>
       </div>
 
-      <Field label="Placeholder tile images" hint="Dashed 'coming soon' tiles until real acquisitions exist.">
+      <Field label="Acquisition tiles" hint="Name, subtitle (e.g. 'Reserved' or the year) and image for each tile.">
         <RepeatableList
-          items={state.placeholderImages}
-          onChange={(next) => update("placeholderImages", next)}
-          createItem={() => ""}
-          addLabel="+ Add image"
-          renderItem={(item, index) => (
-            <MediaUploadField
-              value={item}
-              onChange={(url) => {
-                const next = [...state.placeholderImages];
-                next[index] = url;
-                update("placeholderImages", next);
-              }}
-            />
-          )}
+          items={tiles}
+          onChange={updateTiles}
+          createItem={() => ({ id: crypto.randomUUID(), name: "", subtitle: "", image: "", alt: "" })}
+          addLabel="+ Add acquisition"
+          renderItem={(item, index) => {
+            const set = (patch: Partial<AcquisitionTile>) => {
+              const next = [...tiles];
+              next[index] = { ...next[index], ...patch };
+              updateTiles(next);
+            };
+            return (
+              <div className="flex flex-col gap-2">
+                <Input placeholder="Name" value={item.name} onChange={(e) => set({ name: e.target.value })} />
+                <Input
+                  placeholder="Subtitle (optional)"
+                  value={item.subtitle}
+                  onChange={(e) => set({ subtitle: e.target.value })}
+                />
+                <MediaUploadField placeholder="Image" value={item.image} onChange={(url) => set({ image: url })} />
+                <Input placeholder="Alt text" value={item.alt} onChange={(e) => set({ alt: e.target.value })} />
+              </div>
+            );
+          }}
         />
       </Field>
 

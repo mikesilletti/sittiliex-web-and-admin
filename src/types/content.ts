@@ -49,6 +49,8 @@ export interface HeroContent {
   secondaryCta: CTAItem;
   backgroundImage: string;
   backgroundImageAlt: string;
+  /** Optional: blank or absent shows "Scroll". */
+  scrollLabel?: string;
 }
 
 export interface TrustStripContent {
@@ -89,12 +91,23 @@ export interface AcquisitionProcessContent {
   steps: ProcessStep[];
 }
 
+export interface AcquisitionTile {
+  id: string;
+  name: string;
+  subtitle: string;
+  image: string;
+  alt: string;
+}
+
 export interface RecentAcquisitionsContent {
   eyebrow: string;
   heading: string;
   body: string;
   cta: CTAItem;
-  placeholderImages: string[];
+  /** Optional: sections saved before tiles were editable only have placeholderImages. */
+  tiles?: AcquisitionTile[];
+  /** Legacy image-only tiles; read as a fallback when `tiles` is absent. */
+  placeholderImages?: string[];
 }
 
 export interface FaqContent {
@@ -111,6 +124,18 @@ export interface ContactContent {
   /** Optional: sections saved before the field existed have no phone. */
   phone?: string;
   backgroundImage: string;
+  /** Optional copy fields; blank or absent falls back to CONTACT_COPY_DEFAULTS. */
+  emailLabel?: string;
+  phoneLabel?: string;
+  namePlaceholder?: string;
+  emailPlaceholder?: string;
+  companyPlaceholder?: string;
+  messagePlaceholder?: string;
+  submitLabel?: string;
+  submittingLabel?: string;
+  successHeading?: string;
+  successMessage?: string;
+  errorMessage?: string;
 }
 
 export type SectionType =

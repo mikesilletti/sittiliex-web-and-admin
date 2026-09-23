@@ -11,6 +11,7 @@ import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ScrubReveal } from "@/components/motion/ScrubReveal";
 import { contactSchema } from "@/lib/contact-schema";
 import { COMPANY, toTelHref } from "@/lib/company";
+import { contactCopy, type ContactCopyKey } from "@/lib/content-defaults";
 import type { ContactContent } from "@/types/content";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -20,6 +21,7 @@ export function Contact({ content: contact }: { content: ContactContent }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>("idle");
   const phone = contact.phone || COMPANY.phone;
+  const copy = (key: ContactCopyKey) => contactCopy(contact, key);
 
   function handleChange(field: keyof typeof values) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -64,11 +66,9 @@ export function Contact({ content: contact }: { content: ContactContent }) {
             <div className="mx-auto max-w-lg rounded-lg border border-accent/30 bg-background-raised p-10 text-center">
               <CheckCircle2 size={32} className="mx-auto text-accent" />
               <h3 className="mt-4 text-lg font-heading font-semibold text-foreground">
-                Message received.
+                {copy("successHeading")}
               </h3>
-              <p className="mt-2 text-body-md text-foreground-muted">
-                Thank you for reaching out — we&apos;ll be in touch soon, in complete confidence.
-              </p>
+              <p className="mt-2 text-body-md text-foreground-muted">{copy("successMessage")}</p>
             </div>
           </RevealOnScroll>
         </Container>
@@ -110,7 +110,7 @@ export function Contact({ content: contact }: { content: ContactContent }) {
             <RevealOnScroll delay={0.15}>
               <div className="mt-8 flex flex-col gap-2 text-sm text-foreground-muted">
                 <div>
-                  Prefer email?{" "}
+                  {copy("emailLabel")}{" "}
                   <MagneticButton strength={0.25} className="inline-block">
                     <a
                       href={`mailto:${contact.email}`}
@@ -121,7 +121,7 @@ export function Contact({ content: contact }: { content: ContactContent }) {
                   </MagneticButton>
                 </div>
                 <div>
-                  Rather talk?{" "}
+                  {copy("phoneLabel")}{" "}
                   <MagneticButton strength={0.25} className="inline-block">
                     <a
                       href={toTelHref(phone)}
@@ -139,8 +139,8 @@ export function Contact({ content: contact }: { content: ContactContent }) {
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
               <div>
                 <Input
-                  placeholder="Your name"
-                  aria-label="Your name"
+                  placeholder={copy("namePlaceholder")}
+                  aria-label={copy("namePlaceholder")}
                   value={values.name}
                   onChange={handleChange("name")}
                   aria-invalid={!!errors.name}
@@ -156,8 +156,8 @@ export function Contact({ content: contact }: { content: ContactContent }) {
               <div>
                 <Input
                   type="email"
-                  placeholder="Email address"
-                  aria-label="Email address"
+                  placeholder={copy("emailPlaceholder")}
+                  aria-label={copy("emailPlaceholder")}
                   value={values.email}
                   onChange={handleChange("email")}
                   aria-invalid={!!errors.email}
@@ -171,16 +171,16 @@ export function Contact({ content: contact }: { content: ContactContent }) {
               </div>
 
               <Input
-                placeholder="Company (optional)"
-                aria-label="Company"
+                placeholder={copy("companyPlaceholder")}
+                aria-label={copy("companyPlaceholder")}
                 value={values.company}
                 onChange={handleChange("company")}
               />
 
               <div>
                 <Textarea
-                  placeholder="Tell us about your business"
-                  aria-label="Message"
+                  placeholder={copy("messagePlaceholder")}
+                  aria-label={copy("messagePlaceholder")}
                   value={values.message}
                   onChange={handleChange("message")}
                   aria-invalid={!!errors.message}
@@ -195,14 +195,12 @@ export function Contact({ content: contact }: { content: ContactContent }) {
 
               <MagneticButton strength={0.2} className="mt-2 w-full">
                 <Button type="submit" variant="primary" disabled={status === "submitting"} className="w-full">
-                  {status === "submitting" ? "Sending…" : "Send Message"}
+                  {status === "submitting" ? copy("submittingLabel") : copy("submitLabel")}
                 </Button>
               </MagneticButton>
 
               {status === "error" && (
-                <p className="text-xs text-red-400">
-                  Something went wrong — please try again or email us directly.
-                </p>
+                <p className="text-xs text-red-400">{copy("errorMessage")}</p>
               )}
             </form>
           </RevealOnScroll>

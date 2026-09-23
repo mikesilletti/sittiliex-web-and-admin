@@ -10,6 +10,7 @@ import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { SplitText } from "@/components/motion/SplitText";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { HERO_SCROLL_LABEL_DEFAULT } from "@/lib/content-defaults";
 import type { HeroContent } from "@/types/content";
 
 export function Hero({ content }: { content: HeroContent }) {
@@ -139,7 +140,9 @@ export function Hero({ content }: { content: HeroContent }) {
           transition={{ duration: 0.6, delay: 1.4 }}
           className="flex flex-col items-center gap-2 text-foreground-subtle"
         >
-          <span className="text-xs uppercase tracking-widest">Scroll</span>
+          <span className="text-xs uppercase tracking-widest">
+            {hero.scrollLabel ?? HERO_SCROLL_LABEL_DEFAULT}
+          </span>
           <motion.div
             animate={shouldReduceMotion ? undefined : { y: [0, 6, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}

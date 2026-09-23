@@ -10,11 +10,12 @@ import { MagneticButton } from "@/components/motion/MagneticButton";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import { acquisitionTiles } from "@/lib/content-defaults";
 import type { RecentAcquisitionsContent } from "@/types/content";
 
 export function RecentAcquisitions({ content: recentAcquisitions }: { content: RecentAcquisitionsContent }) {
   const shouldReduceMotion = useReducedMotion();
-  const { placeholderImages } = recentAcquisitions;
+  const tiles = acquisitionTiles(recentAcquisitions);
 
   return (
     <section id="acquisitions" className="relative overflow-hidden py-24 md:py-32 bg-background-raised/40">
@@ -36,16 +37,18 @@ export function RecentAcquisitions({ content: recentAcquisitions }: { content: R
         </RevealOnScroll>
 
         <div className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto">
-          {[0, 1, 2].map((i) => (
-            <RevealOnScroll key={i} delay={i * 0.08}>
+          {tiles.map((tile, i) => (
+            <RevealOnScroll key={tile.id} delay={i * 0.08}>
               <div className="group relative flex h-48 flex-col justify-end overflow-hidden rounded-md border border-dashed border-border-strong transition-colors duration-300 hover:border-accent/50">
-                <Image
-                  src={placeholderImages[i]}
-                  alt=""
-                  fill
-                  sizes="(min-width: 640px) 33vw, 90vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                />
+                {tile.image && (
+                  <Image
+                    src={tile.image}
+                    alt={tile.alt}
+                    fill
+                    sizes="(min-width: 640px) 33vw, 90vw"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                  />
+                )}
                 <div
                   aria-hidden="true"
                   className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent"
@@ -62,10 +65,10 @@ export function RecentAcquisitions({ content: recentAcquisitions }: { content: R
                 )}
                 <div className="relative flex items-center justify-between gap-2 p-4">
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-foreground">
-                      Acquisition {String(i + 1).padStart(2, "0")}
-                    </p>
-                    <p className="text-[11px] text-foreground-muted">Reserved</p>
+                    <p className="text-xs uppercase tracking-widest text-foreground">{tile.name}</p>
+                    {tile.subtitle && (
+                      <p className="text-[11px] text-foreground-muted">{tile.subtitle}</p>
+                    )}
                   </div>
                   <span
                     className={cn(

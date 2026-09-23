@@ -50,7 +50,7 @@ const defaults: { [K in SectionType]: SectionContentMap[K] } = {
     heading: "",
     body: "",
     cta: { label: "", href: "#contact" },
-    placeholderImages: [],
+    tiles: [],
   },
   faq: {
     eyebrow: "",

@@ -7,6 +7,7 @@ import { RepeatableList } from "@/components/admin/RepeatableList";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
+import { HERO_SCROLL_LABEL_DEFAULT } from "@/lib/content-defaults";
 import type { HeroContent } from "@/types/content";
 
 export function HeroForm({ id, content }: { id: string; content: HeroContent }) {
@@ -108,6 +109,12 @@ export function HeroForm({ id, content }: { id: string; content: HeroContent }) 
         <Input
           value={state.backgroundImageAlt}
           onChange={(e) => update("backgroundImageAlt", e.target.value)}
+        />
+      </Field>
+      <Field label="Scroll cue label" hint="Small text above the arrow at the bottom of the hero.">
+        <Input
+          value={state.scrollLabel ?? HERO_SCROLL_LABEL_DEFAULT}
+          onChange={(e) => update("scrollLabel", e.target.value)}
         />
       </Field>
 

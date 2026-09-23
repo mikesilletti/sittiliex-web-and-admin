@@ -23,6 +23,7 @@ const heroSchema = z.object({
   secondaryCta: cta,
   backgroundImage: imagePath,
   backgroundImageAlt: short,
+  scrollLabel: short.optional(),
 });
 
 const trustStripSchema = z.object({
@@ -72,7 +73,11 @@ const recentAcquisitionsSchema = z.object({
   heading: short,
   body: long,
   cta,
-  placeholderImages: z.array(imagePath).max(50),
+  tiles: z
+    .array(z.object({ id: short, name: short, subtitle: short, image: imagePath, alt: short }))
+    .max(50)
+    .optional(),
+  placeholderImages: z.array(imagePath).max(50).optional(),
 });
 
 const faqSchema = z.object({
@@ -88,6 +93,17 @@ const contactSchema = z.object({
   email: emailOrBlank,
   phone: short.default(""),
   backgroundImage: imagePath,
+  emailLabel: short.optional(),
+  phoneLabel: short.optional(),
+  namePlaceholder: short.optional(),
+  emailPlaceholder: short.optional(),
+  companyPlaceholder: short.optional(),
+  messagePlaceholder: short.optional(),
+  submitLabel: short.optional(),
+  submittingLabel: short.optional(),
+  successHeading: short.optional(),
+  successMessage: long.optional(),
+  errorMessage: long.optional(),
 });
 
 const schemas: Record<SectionType, z.ZodTypeAny> = {
