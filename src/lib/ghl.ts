@@ -33,8 +33,10 @@ export interface GhlSyncResult {
 }
 
 function config() {
-  const token = process.env.GHL_API_TOKEN;
-  const locationId = process.env.GHL_LOCATION_ID;
+  // Trimmed: values piped into `vercel env add` from Windows shells can carry a
+  // trailing \r\n, which GHL rejects as a different location/token.
+  const token = process.env.GHL_API_TOKEN?.trim();
+  const locationId = process.env.GHL_LOCATION_ID?.trim();
   return token && locationId ? { token, locationId } : null;
 }
 
