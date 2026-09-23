@@ -9,6 +9,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { Marquee } from "@/components/motion/Marquee";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { useStableViewportHeight } from "@/lib/use-stable-viewport-height";
 import type { IndustriesGridContent, FeaturedIndustry } from "@/types/content";
 
 function IndustryTile({ industry }: { industry: FeaturedIndustry }) {
@@ -50,7 +51,12 @@ export function IndustriesGrid({ content }: { content: IndustriesGridContent }) 
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [distance, setDistance] = useState(0);
-  const [pinHeight, setPinHeight] = useState(0);
+  const vh = useStableViewportHeight();
+  // Scroll distance matches the horizontal distance 1:1 (plus one viewport of
+  // settle room) so the pin never runs longer than the cards actually need to
+  // travel. Uses the toolbar-stable height so mobile browsers showing/hiding
+  // their address bar don't change the page length mid-scroll.
+  const pinHeight = distance > 0 && vh ? distance + vh : 0;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -69,9 +75,6 @@ export function IndustriesGrid({ content }: { content: IndustriesGridContent }) 
         trackRef.current.scrollWidth - viewportRef.current.clientWidth
       );
       setDistance(horizontalDistance);
-      // Scroll distance matches the horizontal distance 1:1 (plus one viewport of
-      // settle room) so the pin never runs longer than the cards actually need to travel.
-      setPinHeight(horizontalDistance + window.innerHeight);
     }
     measure();
     window.addEventListener("resize", measure);
@@ -123,9 +126,13 @@ export function IndustriesGrid({ content }: { content: IndustriesGridContent }) 
         <div
           ref={sectionRef}
           className="relative mt-20"
-          style={{ height: pinHeight > 0 ? `${pinHeight}px` : `${featuredIndustries.length * 30}vh` }}
+          style={{ height: pinHeight > 0 ? `${pinHeight}px` : `${featuredIndustries.length * 30}svh` }}
         >
-          <div ref={viewportRef} className="sticky top-0 flex h-screen items-center overflow-hidden">
+          <div
+            ref={viewportRef}
+            className="sticky top-0 flex h-[100svh] items-center overflow-hidden"
+            style={vh ? { height: `${vh}px` } : undefined}
+          >
             <motion.div ref={trackRef} style={{ x }} className="flex gap-5 pl-6 md:pl-10">
               {featuredIndustries.map((industry) => (
                 <div key={industry.id} className="w-[78vw] max-w-[420px] shrink-0 sm:w-[45vw] lg:w-[32vw]">

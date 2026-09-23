@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { Container } from "@/components/ui/Container";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { useStableViewportHeight } from "@/lib/use-stable-viewport-height";
 import type { AcquisitionProcessContent, ProcessStep } from "@/types/content";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ export function AcquisitionProcess({ content }: { content: AcquisitionProcessCon
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
+  const vh = useStableViewportHeight();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -43,8 +45,16 @@ export function AcquisitionProcess({ content }: { content: AcquisitionProcessCon
   }
 
   return (
-    <section id="process" ref={containerRef} className="relative" style={{ height: `${processSteps.length * 100}vh` }}>
-      <div className="sticky top-0 h-screen flex items-center overflow-hidden py-24">
+    <section
+      id="process"
+      ref={containerRef}
+      className="relative"
+      style={{ height: vh ? `${processSteps.length * vh}px` : `${processSteps.length * 100}svh` }}
+    >
+      <div
+        className="sticky top-0 h-[100svh] flex items-center overflow-hidden py-24"
+        style={vh ? { height: `${vh}px` } : undefined}
+      >
         <Container>
           <SectionIntro eyebrow={eyebrow} heading={heading} body={body} />
 

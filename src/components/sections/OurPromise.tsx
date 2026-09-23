@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { Container } from "@/components/ui/Container";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { useStableViewportHeight } from "@/lib/use-stable-viewport-height";
 import type { OurPromiseContent } from "@/types/content";
 
 function Word({
@@ -61,6 +62,7 @@ export function OurPromise({ content: ourPromise }: { content: OurPromiseContent
     offset: ["start start", "end end"],
   });
   const eyebrowOpacity = useTransform(scrollYProgress, [0, 0.12], [0, 1]);
+  const vh = useStableViewportHeight();
 
   if (shouldReduceMotion) {
     return (
@@ -79,8 +81,11 @@ export function OurPromise({ content: ourPromise }: { content: OurPromiseContent
   }
 
   return (
-    <section ref={containerRef} className="relative" style={{ height: "220vh" }}>
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+    <section ref={containerRef} className="relative" style={{ height: vh ? `${vh * 2.2}px` : "220svh" }}>
+      <div
+        className="sticky top-0 flex h-[100svh] items-center overflow-hidden"
+        style={vh ? { height: `${vh}px` } : undefined}
+      >
         <Container>
           <div className="mx-auto max-w-4xl text-center">
             <motion.p

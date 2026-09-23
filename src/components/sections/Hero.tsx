@@ -10,12 +10,14 @@ import { ParallaxImage } from "@/components/motion/ParallaxImage";
 import { SplitText } from "@/components/motion/SplitText";
 import { MagneticButton } from "@/components/motion/MagneticButton";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { useStableViewportHeight } from "@/lib/use-stable-viewport-height";
 import { HERO_SCROLL_LABEL_DEFAULT } from "@/lib/content-defaults";
 import type { HeroContent } from "@/types/content";
 
 export function Hero({ content }: { content: HeroContent }) {
   const hero = content;
   const shouldReduceMotion = useReducedMotion();
+  const vh = useStableViewportHeight();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -30,7 +32,8 @@ export function Hero({ content }: { content: HeroContent }) {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden pt-40 pb-32 md:pt-56 md:pb-44 min-h-screen flex items-center"
+      className="relative overflow-hidden pt-40 pb-32 md:pt-56 md:pb-44 min-h-[100svh] flex items-center"
+      style={vh ? { minHeight: `${vh}px` } : undefined}
     >
       <motion.div
         className="absolute inset-0"
