@@ -83,6 +83,7 @@ interface GhlContact {
   state?: string | null;
   phone?: string | null;
   lastActivity?: number | string | null;
+  dateAdded?: string;
   customFields?: { id: string; value?: unknown }[];
   searchAfter?: unknown[];
 }
@@ -305,7 +306,9 @@ export async function getReportData(): Promise<ReportData> {
       stageIndex: idx,
       group: groupFor(idx, o.status),
       status: o.status,
-      createdAt: o.createdAt,
+      // A lead's date is when the contact reached GHL, not when its deal was
+      // made: older leads got their deals later (e.g. the Sept backfill).
+      createdAt: c?.dateAdded && c.dateAdded < o.createdAt ? c.dateAdded : o.createdAt,
       lastMoveAt: o.lastStageChangeAt || o.updatedAt || o.createdAt,
       lastActivityAt: lastActivity,
     });

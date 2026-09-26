@@ -7,7 +7,6 @@ import { CLOSED_RATE, PACKAGE_RATE, type ReportData, type Rep } from "@/lib/reps
 import {
   DEFAULT_FILTERS,
   DIMENSIONS,
-  RANGES,
   dimensionOptions,
   emptySel,
   filtersToQuery,
@@ -19,9 +18,9 @@ import {
   statsOf,
   type DimKey,
   type Filters,
-  type RangeKey,
 } from "./model";
-import { MultiSelect, Tabs, buttonClass } from "./ui";
+import { RefreshCw } from "lucide-react";
+import { Button, Chip, MultiSelect, RangePicker, SearchInput, Tabs } from "./ui";
 import { CallsView, CommissionView, DealsView, Overview, RepProfile, RepsView, SourcingView, type Ctx } from "./views";
 
 const TABS = [
@@ -119,9 +118,10 @@ export function ReportsApp({ data, initial, initialTab }: { data: ReportData; in
             </span>
             Live · {live.pending ? "updating…" : `updated ${live.label}`}
           </span>
-          <button type="button" onClick={live.refresh} disabled={live.pending} className={buttonClass}>
-            ↻ Refresh
-          </button>
+          <Button onClick={live.refresh} disabled={live.pending}>
+            <RefreshCw className={cn("h-3.5 w-3.5", live.pending && "animate-spin")} aria-hidden />
+            Refresh
+          </Button>
         </div>
       </div>
 
@@ -140,56 +140,37 @@ export function ReportsApp({ data, initial, initialTab }: { data: ReportData; in
       {/* ---------------------------------------------------------- filters */}
       <div className="sticky top-0 z-20 -mx-6 mt-6 border-y border-border bg-background/95 px-6 py-3 backdrop-blur">
         <div className="flex flex-wrap items-center gap-2">
-          <label className="sr-only" htmlFor="range">Date range</label>
-          <select
-            id="range"
-            value={filters.range}
-            onChange={(e) => setFilters((f) => ({ ...f, range: e.target.value as RangeKey }))}
-            className="focus-ring rounded-sm border border-accent/60 bg-accent/10 px-2.5 py-1.5 text-xs text-foreground"
-          >
-            {RANGES.map((r) => (
-              <option key={r.key} value={r.key}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-          {filters.range === "custom" && (
-            <span className="flex items-center gap-1 text-xs text-foreground-muted">
-              <input type="date" aria-label="From" value={filters.from} onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-                className="focus-ring rounded-sm border border-border bg-background px-2 py-1 text-xs text-foreground [color-scheme:dark]" />
-              –
-              <input type="date" aria-label="To" value={filters.to} onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-                className="focus-ring rounded-sm border border-border bg-background px-2 py-1 text-xs text-foreground [color-scheme:dark]" />
-            </span>
-          )}
+          <RangePicker
+            range={filters.range}
+            from={filters.from}
+            to={filters.to}
+            onChange={(range, from, to) => setFilters((f) => ({ ...f, range, from, to }))}
+          />
           <span className="mx-1 h-5 w-px bg-border" aria-hidden />
           {DIMENSIONS.map((d) => (
             <MultiSelect key={d.key} label={d.label} options={options[d.key]} selected={filters.sel[d.key]} onChange={(v) => setSel(d.key, v)} />
           ))}
-          <input
-            type="search"
-            value={filters.q}
-            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
-            placeholder="Search company, lead…"
-            aria-label="Search deals"
-            className="focus-ring ml-auto w-48 rounded-sm border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-foreground-subtle"
-          />
+          <div className="ml-auto">
+            <SearchInput value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} placeholder="Search company, lead…" />
+          </div>
         </div>
         {(active.length > 0 || filters.q) && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {active.map((a) => (
-              <button
+              <Chip
                 key={`${a.dim}-${a.value}`}
-                type="button"
-                onClick={() => setSel(a.dim, filters.sel[a.dim].filter((v) => v !== a.value))}
-                className="focus-ring inline-flex items-center gap-1 rounded-full border border-border-strong bg-background-raised px-2 py-0.5 text-[11px] text-foreground-muted hover:text-foreground"
-                aria-label={`Remove ${a.label}: ${a.text}`}
-              >
-                <span className="text-foreground-subtle">{a.label}:</span> {a.text} <span aria-hidden>✕</span>
-              </button>
+                label={a.label}
+                value={a.text}
+                onRemove={() => setSel(a.dim, filters.sel[a.dim].filter((v) => v !== a.value))}
+              />
             ))}
+            {filters.q && <Chip label="Search" value={`“${filters.q}”`} onRemove={() => setFilters((f) => ({ ...f, q: "" }))} />}
             {hasFilters && (
-              <button type="button" onClick={() => setFilters({ ...DEFAULT_FILTERS, sel: emptySel() })} className="focus-ring rounded-sm px-2 text-[11px] text-accent hover:underline">
+              <button
+                type="button"
+                onClick={() => setFilters({ ...DEFAULT_FILTERS, sel: emptySel() })}
+                className="focus-ring h-6 rounded-full px-2.5 text-[11px] font-medium text-accent hover:bg-accent/10"
+              >
                 Clear all
               </button>
             )}

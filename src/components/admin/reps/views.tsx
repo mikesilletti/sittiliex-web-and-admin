@@ -35,7 +35,8 @@ import {
   type Stats,
 } from "./model";
 import { Funnel, HBars, Meter, StackedBars, StackedColumns } from "./charts";
-import { Avatar, Card, Empty, Kpi, RepBadge, SortTable, buttonClass, type Column } from "./ui";
+import { Download, X } from "lucide-react";
+import { Avatar, Button, Card, Empty, Kpi, RepBadge, Segmented, SortTable, type Column } from "./ui";
 
 export interface Ctx {
   data: ReportData;
@@ -295,9 +296,9 @@ export function RepProfile({ ctx, repKey, onClose }: { ctx: Ctx; repKey: string;
               <p className="text-xs text-foreground-subtle">{rep.email ?? "Leads owned by the SillettiX team"} · {ctx.period.label}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className={buttonClass}>
-            Close ✕
-          </button>
+          <Button onClick={onClose} aria-label="Close profile">
+            <X className="h-3.5 w-3.5" aria-hidden /> Close
+          </Button>
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -428,22 +429,9 @@ export function SourcingView({ ctx }: { ctx: Ctx }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Break down by">
-        <span className="mr-1 text-xs text-foreground-subtle">Break down by</span>
-        {SOURCING_DIMS.map((d) => (
-          <button
-            key={d.key}
-            type="button"
-            aria-pressed={dim === d.key}
-            onClick={() => setDim(d.key)}
-            className={cn(
-              "focus-ring rounded-sm border px-2.5 py-1 text-xs transition-colors",
-              dim === d.key ? "border-accent/60 bg-accent/10 text-foreground" : "border-border text-foreground-muted hover:text-foreground"
-            )}
-          >
-            {d.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs text-foreground-subtle">Break down by</span>
+        <Segmented label="Break down by" options={SOURCING_DIMS.map((d) => ({ value: d.key, label: d.label }))} value={dim} onChange={setDim} />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <Card className="lg:col-span-2" title={`Leads by ${def.label.toLowerCase()}`} subtitle={ctx.period.label}>
@@ -574,25 +562,18 @@ export function DealsView({ ctx }: { ctx: Ctx }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex gap-1" role="group" aria-label="Which deals">
-          {(["period", "all"] as const).map((w) => (
-            <button
-              key={w}
-              type="button"
-              aria-pressed={which === w}
-              onClick={() => setWhich(w)}
-              className={cn(
-                "focus-ring rounded-sm border px-2.5 py-1 text-xs",
-                which === w ? "border-accent/60 bg-accent/10 text-foreground" : "border-border text-foreground-muted hover:text-foreground"
-              )}
-            >
-              {w === "period" ? `Created in ${ctx.period.label.toLowerCase()}` : "All matching deals"}
-            </button>
-          ))}
-        </div>
-        <button type="button" onClick={exportCsv} className={buttonClass} disabled={!rows.length}>
-          ⤓ Export {rows.length} deals (CSV)
-        </button>
+        <Segmented
+          label="Which deals"
+          value={which}
+          onChange={setWhich}
+          options={[
+            { value: "period", label: `Created in ${ctx.period.label.toLowerCase()}` },
+            { value: "all", label: "All matching deals" },
+          ]}
+        />
+        <Button onClick={exportCsv} disabled={!rows.length}>
+          <Download className="h-3.5 w-3.5" aria-hidden /> Export {rows.length} deals (CSV)
+        </Button>
       </div>
       <SortTable columns={cols} rows={rows} rowKey={(d) => d.id} initialSort={{ key: "created", dir: "desc" }} pageSize={50} minWidth={1320} />
     </div>
@@ -639,7 +620,11 @@ export function CommissionView({ ctx }: { ctx: Ctx }) {
       <Card
         title="Payout by rep and month"
         subtitle="What each rep is owed. Team-owned deals earn no commission."
-        actions={<button type="button" onClick={exportCsv} className={buttonClass} disabled={!lines.length}>⤓ Payout CSV</button>}
+        actions={
+          <Button onClick={exportCsv} disabled={!lines.length}>
+            <Download className="h-3.5 w-3.5" aria-hidden /> Payout CSV
+          </Button>
+        }
       >
         {lines.length === 0 ? (
           <Empty>No commission in {ctx.period.label.toLowerCase()} yet. It&apos;s logged when the team moves a deal to Financials Received ($15) or Closed Won ($5,000).</Empty>
