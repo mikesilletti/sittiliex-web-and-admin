@@ -8,6 +8,7 @@ import { useContactNotifications } from "@/components/admin/notifications/Contac
 
 const links = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/reps", label: "Reps" },
   { href: "/admin/sections", label: "Sections" },
   { href: "/admin/contacts", label: "Contacts" },
   { href: "/admin/theme", label: "Theme" },
