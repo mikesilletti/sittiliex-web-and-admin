@@ -1,4 +1,4 @@
-// Shared between the server loader (scorecard.ts) and the client view.
+// Shared between the server loader (scorecard.ts) and the client reports app.
 
 export const STALE_DAYS = 14;
 
@@ -26,29 +26,86 @@ export const STAGE_GROUPS = [
 ] as const;
 export type StageGroupKey = (typeof STAGE_GROUPS)[number]["key"];
 
-export interface CommissionLine {
-  kind: "package" | "closed";
-  amount: number;
-  lead: string;
-  company: string;
-  contactId: string;
-  at: string; // ISO
-  month: string; // YYYY-MM, Eastern
-}
+export const SOURCES = ["Facebook ads", "Website", "Rep-sourced", "Other"] as const;
+export type Source = (typeof SOURCES)[number];
 
-export interface Lead {
+// Answer options from the Facebook / website prequalification form, in order.
+export const REVENUE_BANDS = [
+  "Under $250,000",
+  "$250,000 - $500,000",
+  "$500,000 - $1 million",
+  "$1 million - $2 million",
+  "$2 million - $5 million",
+  "$5 million+",
+  "Not given",
+];
+export const PROFIT_BANDS = REVENUE_BANDS;
+export const TIMELINES = [
+  "As soon as possible",
+  "Within 3 months",
+  "3-6 months",
+  "6-12 months",
+  "More than 12 months",
+  "Just exploring",
+  "Not given",
+];
+export const ASKING_BANDS = ["Under $250k", "$250k - $500k", "$500k - $1M", "$1M - $5M", "$5M+", "Not given"];
+export const INDUSTRY_GROUPS = [
+  "Home services",
+  "Automotive",
+  "Food & beverage",
+  "Retail",
+  "Health & beauty",
+  "Transportation",
+  "Manufacturing",
+  "Professional services",
+  "Hospitality & leisure",
+  "Other",
+  "Not given",
+];
+
+export type CallStatus = "upcoming" | "held" | "no-show" | "cancelled" | "unmarked";
+
+export interface Deal {
+  id: string;
   contactId: string;
   lead: string;
   company: string;
+  repKey: string;
+  source: Source;
+  industry: string; // group
+  industryRaw: string;
+  state: string; // 2-letter, or "Unknown"
+  locationRaw: string;
+  revenue: string;
+  profit: string;
+  timeline: string;
+  asking: string; // band
+  askingValue: number | null;
   stage: string;
   stageIndex: number;
   group: StageGroupKey | null;
   status: "open" | "won" | "lost" | "abandoned";
-  selfSourced: boolean;
   createdAt: string;
-  createdMonth: string;
   lastMoveAt: string;
-  daysSinceMove: number;
+  lastActivityAt: string | null;
+}
+
+export interface CommissionLine {
+  kind: "package" | "closed";
+  amount: number;
+  contactId: string;
+  repKey: string;
+  at: string; // ISO
+}
+
+export interface Call {
+  id: string;
+  contactId: string;
+  repKey: string;
+  start: string; // ISO
+  status: CallStatus;
+  calendar: string;
 }
 
 export interface Rep {
@@ -56,16 +113,15 @@ export interface Rep {
   name: string;
   email: string | null;
   status: "active" | "left" | "team";
-  leads: Lead[];
-  commission: CommissionLine[];
 }
 
-export interface Scorecard {
+export interface ReportData {
   generatedAt: string;
   locationId: string;
   reps: Rep[];
-  months: string[]; // YYYY-MM with any activity, newest first
-  currentMonth: string;
+  deals: Deal[];
+  commission: CommissionLine[];
+  calls: Call[];
   stageNames: string[];
   warnings: string[];
 }
@@ -73,3 +129,15 @@ export interface Scorecard {
 export function ghlContactUrl(locationId: string, contactId: string) {
   return `https://app.gohighlevel.com/v2/location/${locationId}/contacts/detail/${contactId}`;
 }
+
+// Chart colors, validated for the admin's dark surface (#0d1117) with the
+// dataviz palette validator: categorical passes CVD/normal-vision/contrast,
+// the ordinal ramp is one hue, monotone, light end >= 3:1.
+export const SOURCE_COLORS: Record<Source, string> = {
+  "Facebook ads": "#3987e5",
+  Website: "#d95926",
+  "Rep-sourced": "#199e70",
+  Other: "#c98500",
+};
+export const ORDINAL_RAMP = ["#9ec5f4", "#6da7ec", "#3987e5", "#256abf"]; // light -> dark
+export const STATUS = { good: "#0ca30c", warning: "#fab219", critical: "#d03b3b" };

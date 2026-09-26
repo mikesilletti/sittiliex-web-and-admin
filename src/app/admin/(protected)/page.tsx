@@ -6,7 +6,7 @@ import { StatTile } from "@/components/admin/StatTile";
 import type { SectionType } from "@/types/content";
 
 const cards = [
-  { href: "/admin/reps", title: "Rep Scorecard", description: "Live commission, leads and pipeline for every sales rep." },
+  { href: "/admin/reps", title: "Rep Reports", description: "Live reports: commission, sourcing, calls and pipeline for every rep." },
   { href: "/admin/sections", title: "Sections", description: "Reorder, hide, edit, or add homepage sections." },
   { href: "/admin/contacts", title: "Contacts", description: "Read and download contact form submissions." },
   { href: "/admin/theme", title: "Theme", description: "Colors and font pairing for the whole site." },

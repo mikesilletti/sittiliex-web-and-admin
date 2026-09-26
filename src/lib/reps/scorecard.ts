@@ -1,14 +1,21 @@
 import "server-only";
 import {
+  PROFIT_BANDS,
+  REVENUE_BANDS,
   STAGE_GROUPS,
+  TIMELINES,
+  type Call,
+  type CallStatus,
   type CommissionLine,
-  type Lead,
+  type Deal,
+  type ReportData,
   type Rep,
-  type Scorecard,
+  type Source,
   type StageGroupKey,
 } from "./shared";
+import { askingBand, askingValue, formBand, industryGroup, stateOf } from "./normalize";
 
-// Live rep scorecard, read straight from GoHighLevel on every request.
+// Live rep reporting, read straight from GoHighLevel on every request.
 //
 // How GHL records commission (built in the SillettiX location, 2026-09-26):
 //   - every lead carries a "Credited Rep Email" contact field, stamped when the
@@ -20,15 +27,26 @@ import {
 //   - reps are GHL users with role "user"; admins are the internal team
 //   - leads a rep added themselves are tagged "rep-sourced"
 // Notes are only fetched for deals that have reached Financials Received or
-// later, which keeps each page load to a handful of GHL calls.
+// later, which keeps each load to a handful of GHL calls.
 
 const API = "https://services.leadconnectorhq.com";
-const VERSION = "2021-07-28";
 const PIPELINE_ID = "Y1NDUrBSK8LfLGJLiHAv"; // SillettiX Acquisition Pipeline
-const CREDITED_EMAIL_FIELD = "lDMO7lKPaa7tm63beqcP"; // Credited Rep Email
+const CALENDARS: Record<string, string> = {
+  "20Zz3ZEF9GfQMWkpqKNQ": "Discovery call",
+  PYogOSyHzLrhK7XsdnHe: "Personal calendar",
+};
+// Contact custom fields (the Prequalification Form section).
+const FIELD = {
+  creditedEmail: "lDMO7lKPaa7tm63beqcP",
+  industry: "G5KaNJyvGdncHyiTHplt",
+  location: "uBJF8aclX23O7nJyfazh",
+  revenue: "NdRT69iiTD62oBATEUg6",
+  profit: "sYDlwDtCWs2S8PxfkIAl",
+  timing: "FJ4N0gAzHSYLYU76BTtA",
+  asking: "l8Jvrz6GOtP9ZQ8mQAwI",
+};
 const REP_SOURCED_TAG = "rep-sourced";
 const INTERNAL_TAG = "sillettix-internal";
-const TZ = "America/New_York";
 const CACHE_MS = 15_000;
 
 interface GhlUser {
@@ -46,9 +64,8 @@ interface GhlOpportunity {
   name?: string;
   contactId: string;
   assignedTo?: string | null;
-  status: Lead["status"];
+  status: Deal["status"];
   pipelineStageId: string;
-  monetaryValue?: number;
   createdAt: string;
   updatedAt?: string;
   lastStageChangeAt?: string;
@@ -62,8 +79,21 @@ interface GhlContact {
   companyName?: string;
   assignedTo?: string | null;
   tags?: string[];
+  source?: string | null;
+  state?: string | null;
+  phone?: string | null;
+  lastActivity?: number | string | null;
   customFields?: { id: string; value?: unknown }[];
   searchAfter?: unknown[];
+}
+
+interface GhlEvent {
+  id: string;
+  contactId?: string;
+  assignedUserId?: string;
+  startTime: string;
+  appointmentStatus?: string;
+  deleted?: boolean;
 }
 
 function config() {
@@ -72,12 +102,16 @@ function config() {
   return token && locationId ? { token, locationId } : null;
 }
 
-async function ghl<T>(token: string, path: string, init?: { method?: string; body?: unknown }): Promise<T> {
+async function ghl<T>(
+  token: string,
+  path: string,
+  init?: { method?: string; body?: unknown; version?: string }
+): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     method: init?.method ?? "GET",
     headers: {
       Authorization: `Bearer ${token}`,
-      Version: VERSION,
+      Version: init?.version ?? "2021-07-28",
       Accept: "application/json",
       "Content-Type": "application/json",
     },
@@ -86,19 +120,10 @@ async function ghl<T>(token: string, path: string, init?: { method?: string; bod
   });
   const text = await res.text();
   if (!res.ok) {
-    const scope = /scope/i.test(text) ? " (the GHL token is missing a permission)" : "";
+    const scope = /scope|not authorized/i.test(text) ? " (the GHL key is missing a permission)" : "";
     throw new Error(`GHL ${path.split("?")[0]} → ${res.status}${scope}`);
   }
   return (text ? JSON.parse(text) : {}) as T;
-}
-
-const monthFmt = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit" });
-export function monthKey(iso: string | Date) {
-  return monthFmt.format(typeof iso === "string" ? new Date(iso) : iso).slice(0, 7);
-}
-
-function stripHtml(s: string) {
-  return s.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
 }
 
 async function loadAllOpportunities(token: string, locationId: string) {
@@ -131,31 +156,55 @@ async function loadAllContacts(token: string, locationId: string) {
   return out;
 }
 
-/** Run async work with a small concurrency cap (GHL allows ~100 requests / 10s). */
-async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>) {
-  const results: R[] = new Array(items.length);
-  let next = 0;
+async function loadCalls(token: string, locationId: string, warnings: string[]) {
+  const start = Date.now() - 540 * 86_400_000; // 18 months back
+  const end = Date.now() + 120 * 86_400_000;
+  const all: (GhlEvent & { calendar: string })[] = [];
   await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, async () => {
-      while (next < items.length) {
-        const i = next++;
-        results[i] = await fn(items[i]);
+    Object.entries(CALENDARS).map(async ([calendarId, calendar]) => {
+      try {
+        const res = await ghl<{ events?: GhlEvent[] }>(
+          token,
+          `/calendars/events?locationId=${locationId}&calendarId=${calendarId}&startTime=${start}&endTime=${end}`,
+          { version: "2021-04-15" }
+        );
+        for (const e of res.events ?? []) if (!e.deleted) all.push({ ...e, calendar });
+      } catch (e) {
+        warnings.push(`Couldn't read the ${calendar} (${(e as Error).message}); call numbers are missing.`);
       }
     })
   );
-  return results;
+  return all;
 }
 
-let cache: { at: number; data: Scorecard } | null = null;
+/** Run async work with a small concurrency cap (GHL allows ~100 requests / 10s). */
+async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) await fn(items[next++]);
+    })
+  );
+}
 
-export async function getScorecard(force = false): Promise<Scorecard> {
-  if (!force && cache && Date.now() - cache.at < CACHE_MS) return cache.data;
+function callStatus(raw: string | undefined, startIso: string): CallStatus {
+  const s = (raw ?? "").toLowerCase();
+  if (s === "showed") return "held";
+  if (s === "noshow") return "no-show";
+  if (s === "cancelled" || s === "invalid") return "cancelled";
+  return new Date(startIso).getTime() > Date.now() ? "upcoming" : "unmarked";
+}
+
+let cache: { at: number; data: ReportData } | null = null;
+
+export async function getReportData(): Promise<ReportData> {
+  if (cache && Date.now() - cache.at < CACHE_MS) return cache.data;
   const cfg = config();
   if (!cfg) throw new Error("GHL is not configured (GHL_API_TOKEN / GHL_LOCATION_ID)");
   const { token, locationId } = cfg;
   const warnings: string[] = [];
 
-  const [usersRes, pipelinesRes, opportunities, contacts] = await Promise.all([
+  const [usersRes, pipelinesRes, opportunities, contacts, events] = await Promise.all([
     ghl<{ users?: GhlUser[] }>(token, `/users/?locationId=${locationId}`).catch((e: Error) => {
       warnings.push(`Couldn't read GHL users (${e.message}); reps are shown by email.`);
       return { users: [] as GhlUser[] };
@@ -166,6 +215,7 @@ export async function getScorecard(force = false): Promise<Scorecard> {
     ),
     loadAllOpportunities(token, locationId),
     loadAllContacts(token, locationId),
+    loadCalls(token, locationId, warnings),
   ]);
 
   const pipeline = pipelinesRes.pipelines?.find((p) => p.id === PIPELINE_ID);
@@ -173,136 +223,145 @@ export async function getScorecard(force = false): Promise<Scorecard> {
   const stages = [...pipeline.stages].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
   const stageIndex = new Map(stages.map((s, i) => [s.id, i]));
   const indexOfName = (name: string) => stages.findIndex((s) => s.name === name);
-  const groupBounds = STAGE_GROUPS.map((g) => ({ ...g, end: indexOfName(g.until) }));
-  const groupFor = (i: number, status: Lead["status"]): StageGroupKey | null => {
-    if (status !== "open") return null;
-    return groupBounds.find((g) => i < g.end)?.key ?? null;
-  };
+  const groupBounds = STAGE_GROUPS.map((g) => ({ key: g.key, end: indexOfName(g.until) }));
+  const groupFor = (i: number, status: Deal["status"]): StageGroupKey | null =>
+    status === "open" ? (groupBounds.find((g) => i < g.end)?.key ?? null) : null;
 
+  // ---- reps
   const users = (usersRes.users ?? []).filter((u) => u.email);
   const userById = new Map(users.map((u) => [u.id, u]));
   const userByEmail = new Map(users.map((u) => [u.email!.toLowerCase(), u]));
-  const adminEmails = new Set(
-    users.filter((u) => u.roles?.role === "admin").map((u) => u.email!.toLowerCase())
-  );
-  const contactById = new Map(contacts.map((c) => [c.id, c]));
-
+  const adminEmails = new Set(users.filter((u) => u.roles?.role === "admin").map((u) => u.email!.toLowerCase()));
   const reps = new Map<string, Rep>();
-  const repFor = (emailRaw: string | null | undefined): Rep => {
+  const repKey = (emailRaw: string | null | undefined): string => {
     const email = (emailRaw ?? "").trim().toLowerCase();
-    const isTeam = !email || adminEmails.has(email);
-    const key = isTeam ? "team" : email;
-    let rep = reps.get(key);
-    if (!rep) {
-      const u = isTeam ? undefined : userByEmail.get(email);
-      rep = {
+    const key = !email || adminEmails.has(email) ? "team" : email;
+    if (!reps.has(key)) {
+      const u = key === "team" ? undefined : userByEmail.get(email);
+      reps.set(key, {
         key,
-        name: isTeam
-          ? "SillettiX team"
-          : u?.name || [u?.firstName, u?.lastName].filter(Boolean).join(" ") || email,
-        email: isTeam ? null : email,
-        status: isTeam ? "team" : u && !u.deleted ? "active" : users.length ? "left" : "active",
-        leads: [],
-        commission: [],
-      };
-      reps.set(key, rep);
+        name:
+          key === "team"
+            ? "SillettiX team"
+            : u?.name || [u?.firstName, u?.lastName].filter(Boolean).join(" ") || email,
+        email: key === "team" ? null : email,
+        status: key === "team" ? "team" : u && !u.deleted ? "active" : users.length ? "left" : "active",
+      });
     }
-    return rep;
+    return key;
   };
-  // every active rep shows up, even with nothing yet
-  for (const u of users) if (u.roles?.role === "user" && !u.deleted) repFor(u.email);
+  for (const u of users) if (u.roles?.role === "user" && !u.deleted) repKey(u.email);
 
-  const now = Date.now();
-  const creditOf = (o: GhlOpportunity) => {
-    const c = contactById.get(o.contactId);
-    const stamped = c?.customFields?.find((f) => f.id === CREDITED_EMAIL_FIELD)?.value;
-    if (typeof stamped === "string" && stamped.includes("@")) return stamped;
-    return userById.get(o.assignedTo ?? c?.assignedTo ?? "")?.email ?? null;
+  // ---- deals
+  const contactById = new Map(contacts.map((c) => [c.id, c]));
+  const field = (c: GhlContact | undefined, id: string) => {
+    const v = c?.customFields?.find((f) => f.id === id)?.value;
+    return typeof v === "string" ? v.trim() : "";
   };
-
-  const leadName = (o: GhlOpportunity) => {
-    const c = contactById.get(o.contactId);
-    return [c?.firstName, c?.lastName].filter(Boolean).join(" ") || o.contact?.name || o.name || "Lead";
-  };
-
+  const deals: Deal[] = [];
+  const repOfContact = new Map<string, string>();
   const financialsIdx = indexOfName("Financials Received");
-  const commissionCandidates: GhlOpportunity[] = [];
+  const commissionCandidates: string[] = [];
 
   for (const o of opportunities) {
     const c = contactById.get(o.contactId);
     const tags = c?.tags ?? o.contact?.tags ?? [];
     if (tags.includes(INTERNAL_TAG)) continue;
+    const stamped = field(c, FIELD.creditedEmail);
+    const owner = userById.get(o.assignedTo ?? c?.assignedTo ?? "")?.email;
+    const key = repKey(stamped.includes("@") ? stamped : owner);
+    repOfContact.set(o.contactId, key);
+    const src = (c?.source ?? "").toLowerCase();
+    const source: Source = tags.includes(REP_SOURCED_TAG)
+      ? "Rep-sourced"
+      : src.includes("website") || tags.includes("website-sell")
+        ? "Website"
+        : src.includes("facebook")
+          ? "Facebook ads"
+          : "Other";
     const idx = stageIndex.get(o.pipelineStageId) ?? 0;
-    const lastMoveAt = o.lastStageChangeAt || o.updatedAt || o.createdAt;
-    repFor(creditOf(o)).leads.push({
+    const industryRaw = field(c, FIELD.industry);
+    const locationRaw = field(c, FIELD.location);
+    const askingRaw = field(c, FIELD.asking);
+    const av = askingValue(askingRaw);
+    const lastActivity = c?.lastActivity ? new Date(c.lastActivity).toISOString() : null;
+    deals.push({
+      id: o.id,
       contactId: o.contactId,
-      lead: leadName(o),
+      lead: [c?.firstName, c?.lastName].filter(Boolean).join(" ") || o.contact?.name || o.name || "Lead",
       company: c?.companyName || o.contact?.companyName || "",
+      repKey: key,
+      source,
+      industry: industryGroup(industryRaw),
+      industryRaw,
+      state: stateOf(locationRaw, c?.state, c?.phone),
+      locationRaw,
+      revenue: formBand(field(c, FIELD.revenue), REVENUE_BANDS),
+      profit: formBand(field(c, FIELD.profit), PROFIT_BANDS),
+      timeline: formBand(field(c, FIELD.timing), TIMELINES),
+      asking: askingBand(av),
+      askingValue: av,
       stage: stages[idx]?.name ?? "Unknown",
       stageIndex: idx,
       group: groupFor(idx, o.status),
       status: o.status,
-      selfSourced: tags.includes(REP_SOURCED_TAG),
       createdAt: o.createdAt,
-      createdMonth: monthKey(o.createdAt),
-      lastMoveAt,
-      daysSinceMove: Math.floor((now - new Date(lastMoveAt).getTime()) / 86_400_000),
+      lastMoveAt: o.lastStageChangeAt || o.updatedAt || o.createdAt,
+      lastActivityAt: lastActivity,
     });
-    if (idx >= financialsIdx || o.status === "won") commissionCandidates.push(o);
+    if (idx >= financialsIdx || o.status === "won") commissionCandidates.push(o.contactId);
   }
 
+  // ---- commission notes (only deals that could have earned any)
+  const commission: CommissionLine[] = [];
   const seen = new Set<string>();
-  await mapLimit(commissionCandidates, 6, async (o) => {
+  await mapLimit([...new Set(commissionCandidates)], 6, async (contactId) => {
     const res = await ghl<{ notes?: { id: string; body?: string; dateAdded: string }[] }>(
       token,
-      `/contacts/${o.contactId}/notes`
+      `/contacts/${contactId}/notes`
     ).catch(() => ({ notes: [] }));
-    for (const n of res.notes ?? []) {
-      const text = stripHtml(n.body ?? "");
-      if (!text.startsWith("COMMISSION") || seen.has(n.id)) continue;
-      seen.add(n.id);
+    const notes = [...(res.notes ?? [])].sort((a, b) => (a.dateAdded < b.dateAdded ? -1 : 1));
+    for (const n of notes) {
+      const text = (n.body ?? "").replace(/<[^>]+>/g, "").trim();
+      if (!text.startsWith("COMMISSION")) continue;
       const parts = text.split("|").map((p) => p.trim());
       const amount = Number((parts[1] ?? "").replace(/\D/g, "")) || 0;
+      const kind = amount >= 1000 ? "closed" : "package";
+      const dedupe = `${contactId}:${kind}`; // one of each per deal, even if moved twice
+      if (seen.has(dedupe)) continue;
+      seen.add(dedupe);
       const emailPart = parts.find((p) => p.includes("@"));
-      const c = contactById.get(o.contactId);
-      repFor(emailPart ?? creditOf(o)).commission.push({
-        kind: amount >= 1000 ? "closed" : "package",
+      commission.push({
+        kind,
         amount,
-        lead: leadName(o),
-        company: c?.companyName || o.contact?.companyName || "",
-        contactId: o.contactId,
+        contactId,
+        repKey: emailPart ? repKey(emailPart) : (repOfContact.get(contactId) ?? "team"),
         at: n.dateAdded,
-        month: monthKey(n.dateAdded),
       });
     }
   });
 
-  // One $15 and one $5,000 per lead at most, even if a deal was moved twice.
-  for (const rep of reps.values()) {
-    const keep = new Map<string, CommissionLine>();
-    for (const line of rep.commission.sort((a, b) => (a.at < b.at ? -1 : 1))) {
-      const k = `${line.contactId}:${line.kind}`;
-      if (!keep.has(k)) keep.set(k, line);
-    }
-    rep.commission = [...keep.values()].sort((a, b) => (a.at < b.at ? 1 : -1));
-  }
+  // ---- discovery calls
+  const calls: Call[] = events
+    .filter((e) => e.contactId)
+    .map((e) => ({
+      id: e.id,
+      contactId: e.contactId!,
+      repKey: repOfContact.get(e.contactId!) ?? repKey(userById.get(e.assignedUserId ?? "")?.email),
+      start: new Date(e.startTime).toISOString(),
+      status: callStatus(e.appointmentStatus, e.startTime),
+      calendar: e.calendar,
+    }));
 
-  const currentMonth = monthKey(new Date());
-  const monthSet = new Set<string>([currentMonth]);
-  for (const rep of reps.values()) {
-    rep.leads.forEach((l) => monthSet.add(l.createdMonth));
-    rep.commission.forEach((c) => monthSet.add(c.month));
-  }
-
-  const data: Scorecard = {
+  const data: ReportData = {
     generatedAt: new Date().toISOString(),
     locationId,
     reps: [...reps.values()].sort(
-      (a, b) =>
-        Number(a.status === "team") - Number(b.status === "team") || a.name.localeCompare(b.name)
+      (a, b) => Number(a.key === "team") - Number(b.key === "team") || a.name.localeCompare(b.name)
     ),
-    months: [...monthSet].sort().reverse(),
-    currentMonth,
+    deals,
+    commission,
+    calls,
     stageNames: stages.map((s) => s.name),
     warnings,
   };
