@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Deploying
+
+The Vercel project `sillettix` is connected to this repo: every push to `master` deploys to production (sillettix.com) automatically. Pull before you push; don't deploy from a local copy with `vercel deploy --prod`.
+
 ## Getting Started
 
 First, run the development server:
