@@ -23,7 +23,6 @@ import {
   daysSince,
   downloadCsv,
   isQuiet,
-  money,
   moneyFull,
   pct,
   ratio,
@@ -35,6 +34,7 @@ import {
   type Stats,
 } from "./model";
 import { Funnel, HBars, Meter, StackedBars, StackedColumns } from "./charts";
+import { DealsWorkspace } from "./deals";
 import { Download, X } from "lucide-react";
 import { Avatar, Button, Card, Empty, Kpi, RepBadge, Segmented, SortTable, type Column } from "./ui";
 
@@ -506,78 +506,7 @@ export function SourcingView({ ctx }: { ctx: Ctx }) {
 // ================================================================== Deals
 
 export function DealsView({ ctx }: { ctx: Ctx }) {
-  const [which, setWhich] = useState<"period" | "all">("period");
-  const rows = which === "period" ? ctx.scope.cohort : ctx.scope.deals;
-  const callsBy = useMemo(() => {
-    const m = new Map<string, Call[]>();
-    for (const c of ctx.data.calls) m.set(c.contactId, [...(m.get(c.contactId) ?? []), c]);
-    return m;
-  }, [ctx.data.calls]);
-
-  const cols: Column<Deal>[] = [
-    { key: "company", label: "Company", sort: (d) => d.company || d.lead, render: (d) => (
-      <span className="flex flex-col">
-        <LeadLink ctx={ctx} deal={d} />
-        <span className="text-[11px] text-foreground-subtle">{d.lead}</span>
-      </span>
-    ) },
-    { key: "rep", label: "Rep", sort: (d) => ctx.rep(d.repKey).name, render: (d) => <span className="text-foreground-muted">{ctx.rep(d.repKey).name}</span> },
-    { key: "source", label: "Source", sort: (d) => d.source, render: (d) => (
-      <span className="inline-flex items-center gap-1.5 text-foreground-muted">
-        <span className="h-2 w-2 rounded-[2px]" style={{ background: SOURCE_COLORS[d.source] }} />
-        {d.source}
-      </span>
-    ) },
-    { key: "industry", label: "Industry", sort: (d) => d.industry, render: (d) => <span className="text-foreground-muted" title={d.industryRaw}>{d.industry}</span> },
-    { key: "state", label: "State", sort: (d) => d.state, render: (d) => <span className="text-foreground-muted" title={d.locationRaw}>{d.state}</span> },
-    { key: "revenue", label: "Revenue", sort: (d) => d.revenue, render: (d) => <span className="whitespace-nowrap text-foreground-muted">{d.revenue}</span> },
-    { key: "profit", label: "Profit", sort: (d) => d.profit, render: (d) => <span className="whitespace-nowrap text-foreground-muted">{d.profit}</span> },
-    { key: "asking", label: "Asking", align: "right", sort: (d) => d.askingValue ?? -1, render: (d) => (d.askingValue ? money(d.askingValue) : "—") },
-    { key: "timeline", label: "Timeline", sort: (d) => d.timeline, render: (d) => <span className="whitespace-nowrap text-foreground-muted">{d.timeline}</span> },
-    { key: "stage", label: "Stage", sort: (d) => d.stageIndex, render: (d) => (
-      <span className="whitespace-nowrap">
-        {d.status === "open" ? <span className="text-foreground">{d.stage}</span> : (
-          <span className={d.status === "won" ? "text-emerald-400" : "text-foreground-subtle"}>{d.status === "won" ? "✓ Won" : `✕ ${d.status[0].toUpperCase()}${d.status.slice(1)}`}</span>
-        )}
-      </span>
-    ) },
-    { key: "moved", label: "In stage", align: "right", title: "Days since the deal last changed stage", sort: (d) => daysSince(d.lastMoveAt, ctx.now), render: (d) => (
-      <span className={isQuiet(d, ctx.now) && d.group !== "team" ? "text-amber-300" : ""}>{daysSince(d.lastMoveAt, ctx.now)}d</span>
-    ) },
-    { key: "calls", label: "Calls", align: "right", sort: (d) => callsBy.get(d.contactId)?.length ?? 0, render: (d) => callsBy.get(d.contactId)?.length ?? 0 },
-    { key: "created", label: "Created", align: "right", sort: (d) => d.createdAt, render: (d) => dateFmt.format(new Date(d.createdAt)) },
-  ];
-
-  function exportCsv() {
-    downloadCsv(`sillettix-deals-${new Date().toISOString().slice(0, 10)}.csv`, [
-      ["Company", "Lead", "Rep", "Source", "Industry", "Industry (as typed)", "State", "Location (as typed)", "Revenue", "Profit", "Asking", "Timeline", "Stage", "Status", "Days in stage", "Created", "GHL link"],
-      ...rows.map((d) => [
-        d.company, d.lead, ctx.rep(d.repKey).name, d.source, d.industry, d.industryRaw, d.state, d.locationRaw, d.revenue, d.profit,
-        d.askingValue ?? "", d.timeline, d.stage, d.status, daysSince(d.lastMoveAt, ctx.now), d.createdAt.slice(0, 10),
-        ghlContactUrl(ctx.data.locationId, d.contactId),
-      ]),
-    ]);
-  }
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Segmented
-          label="Which deals"
-          value={which}
-          onChange={setWhich}
-          options={[
-            { value: "period", label: `Created in ${ctx.period.label.toLowerCase()}` },
-            { value: "all", label: "All matching deals" },
-          ]}
-        />
-        <Button onClick={exportCsv} disabled={!rows.length}>
-          <Download className="h-3.5 w-3.5" aria-hidden /> Export {rows.length} deals (CSV)
-        </Button>
-      </div>
-      <SortTable columns={cols} rows={rows} rowKey={(d) => d.id} initialSort={{ key: "created", dir: "desc" }} pageSize={50} minWidth={1320} />
-    </div>
-  );
+  return <DealsWorkspace ctx={ctx} />;
 }
 
 // ================================================================== Commission

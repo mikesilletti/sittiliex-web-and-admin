@@ -83,6 +83,7 @@ export interface Deal {
   asking: string; // band
   askingValue: number | null;
   stage: string;
+  stageId: string;
   stageIndex: number;
   group: StageGroupKey | null;
   status: "open" | "won" | "lost" | "abandoned";
@@ -123,6 +124,7 @@ export interface ReportData {
   commission: CommissionLine[];
   calls: Call[];
   stageNames: string[];
+  stages: { id: string; name: string }[];
   warnings: string[];
 }
 
@@ -141,3 +143,35 @@ export const SOURCE_COLORS: Record<Source, string> = {
 };
 export const ORDINAL_RAMP = ["#9ec5f4", "#6da7ec", "#3987e5", "#256abf"]; // light -> dark
 export const STATUS = { good: "#0ca30c", warning: "#fab219", critical: "#d03b3b" };
+
+// ------------------------------------------------------------------ deals workspace
+
+/** What moving a deal into each stage sets off in GoHighLevel (the stage workflows). */
+export const STAGE_EFFECTS: Record<string, string> = {
+  "New Lead": "Alerts the owner and creates a first-call task.",
+  "Attempting Contact": "Starts the no-answer sequence: Day 1, 7 and 14 texts and emails (sent 11am–7pm).",
+  "Owner Reached": "Stops the no-answer sequence and alerts the owner.",
+  "Initial Qualification": "Stops the no-answer sequence and creates the qualification task.",
+  "Discovery Call Scheduled": "Stops the no-answer sequence and emails the seller a booking confirmation.",
+  "Discovery Call Completed": "Creates the follow-up task.",
+  "NDA Sent": "Sends the seller the NDA to sign, a heads-up text, and reminders until it's signed.",
+  "NDA Signed": "Stops the NDA reminders and moves the deal straight on to Financials Requested.",
+  "Financials Requested": "Emails and texts the seller the financials request, with reminders every 3 days.",
+  "Financials Received": "Accepts the financial package: logs the credited rep's $15, hands the lead to the team and stops the financials reminders.",
+  "LOI Accepted": "Emails and texts the seller the due-diligence checklist.",
+  "Closing Scheduled": "Emails and texts the seller the closing checklist.",
+  "Closed Won": "Marks the deal won, logs the credited rep's $5,000 and stops every sequence.",
+  "Closed Lost": "Marks the deal lost and stops every sequence.",
+};
+export const DEFAULT_STAGE_EFFECT = "Creates this stage's task and alerts the owner.";
+
+export interface DealDetail {
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  website: string | null;
+  tags: string[];
+  dateAdded: string | null;
+  notes: { id: string; body: string; at: string }[];
+  tasks: { id: string; title: string; due: string | null; done: boolean }[];
+}

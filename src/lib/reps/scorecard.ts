@@ -198,6 +198,11 @@ function callStatus(raw: string | undefined, startIso: string): CallStatus {
 
 let cache: { at: number; data: ReportData } | null = null;
 
+/** Drop the 15s memo so the next load shows a change made from the reports. */
+export function invalidateReportCache() {
+  cache = null;
+}
+
 export async function getReportData(): Promise<ReportData> {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache.data;
   const cfg = config();
@@ -303,6 +308,7 @@ export async function getReportData(): Promise<ReportData> {
       asking: askingBand(av),
       askingValue: av,
       stage: stages[idx]?.name ?? "Unknown",
+      stageId: o.pipelineStageId,
       stageIndex: idx,
       group: groupFor(idx, o.status),
       status: o.status,
@@ -366,6 +372,7 @@ export async function getReportData(): Promise<ReportData> {
     commission,
     calls,
     stageNames: stages.map((s) => s.name),
+    stages: stages.map((s) => ({ id: s.id, name: s.name })),
     warnings,
   };
   cache = { at: Date.now(), data };

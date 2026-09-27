@@ -690,3 +690,173 @@ export function Card({
 export function Empty({ children }: { children: ReactNode }) {
   return <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-foreground-muted">{children}</p>;
 }
+
+// ------------------------------------------------------------------ dialog
+
+export function Dialog({
+  title,
+  children,
+  onClose,
+  actions,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+  actions: ReactNode;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
+      <div className="relative w-full max-w-md rounded-xl border border-border-strong bg-background-overlay p-5 shadow-2xl shadow-black/70">
+        <h2 className="font-heading text-lg text-foreground">{title}</h2>
+        <div className="mt-2 text-sm leading-relaxed text-foreground-muted">{children}</div>
+        <div className="mt-5 flex justify-end gap-2">{actions}</div>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ toasts
+
+export interface Toast {
+  id: number;
+  tone: "success" | "error" | "info";
+  text: string;
+}
+
+export function useToasts() {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const push = (tone: Toast["tone"], text: string) => {
+    const id = Date.now() + Math.random();
+    setToasts((t) => [...t, { id, tone, text }]);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 6000);
+  };
+  const dismiss = (id: number) => setToasts((t) => t.filter((x) => x.id !== id));
+  return { toasts, push, dismiss };
+}
+
+export function Toasts({ toasts, dismiss }: { toasts: Toast[]; dismiss: (id: number) => void }) {
+  return (
+    <div aria-live="polite" className="pointer-events-none fixed bottom-5 right-5 z-[70] flex w-80 flex-col gap-2">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className={cn(
+            "pointer-events-auto flex items-start gap-2.5 rounded-lg border bg-background-overlay px-3.5 py-3 text-sm shadow-2xl shadow-black/60",
+            t.tone === "success" ? "border-emerald-400/40" : t.tone === "error" ? "border-red-400/50" : "border-border-strong"
+          )}
+        >
+          <span
+            aria-hidden
+            className={cn(
+              "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+              t.tone === "success" ? "bg-emerald-400 text-background" : t.tone === "error" ? "bg-red-400 text-background" : "bg-accent text-background"
+            )}
+          >
+            {t.tone === "success" ? "✓" : t.tone === "error" ? "!" : "i"}
+          </span>
+          <span className="flex-1 text-foreground">{t.text}</span>
+          <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss" className="focus-ring rounded text-foreground-subtle hover:text-foreground">
+            <X className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ column menu
+
+export function ColumnMenu({
+  columns,
+  visible,
+  onChange,
+}: {
+  columns: { key: string; label: string }[];
+  visible: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const { open, setOpen, ref, trigger } = usePopover();
+  return (
+    <div ref={ref} className="relative">
+      <button ref={trigger} type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className={cn(BUTTON_BASE, BUTTON_VARIANTS.default)}>
+        Columns
+        <span className="rounded-full bg-border px-1.5 text-[10px] tabular-nums text-foreground-muted">{visible.length}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 text-foreground-subtle transition-transform", open && "rotate-180")} aria-hidden />
+      </button>
+      {open && (
+        <div className={cn(POPOVER, "left-auto right-0 w-56 p-1.5")}>
+          {columns.map((c) => {
+            const on = visible.includes(c.key);
+            return (
+              <button
+                key={c.key}
+                type="button"
+                role="menuitemcheckbox"
+                aria-checked={on}
+                onClick={() => onChange(on ? visible.filter((v) => v !== c.key) : [...visible, c.key])}
+                className="focus-ring flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-xs text-foreground hover:bg-background-raised"
+              >
+                <Checkbox checked={on} />
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ menu button
+
+export function MenuButton({
+  label,
+  items,
+  onSelect,
+  icon,
+}: {
+  label: string;
+  items: { value: string; label: string; hint?: string; current?: boolean }[];
+  onSelect: (value: string) => void;
+  icon?: ReactNode;
+}) {
+  const { open, setOpen, ref, trigger } = usePopover();
+  return (
+    <div ref={ref} className="relative">
+      <button ref={trigger} type="button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)} className={cn(BUTTON_BASE, BUTTON_VARIANTS.default)}>
+        {icon}
+        {label}
+        <ChevronDown className={cn("h-3.5 w-3.5 text-foreground-subtle transition-transform", open && "rotate-180")} aria-hidden />
+      </button>
+      {open && (
+        <div role="menu" className={cn(POPOVER, "max-h-80 w-72 overflow-y-auto p-1.5")}>
+          {items.map((it) => (
+            <button
+              key={it.value}
+              type="button"
+              role="menuitem"
+              disabled={it.current}
+              onClick={() => {
+                setOpen(false);
+                onSelect(it.value);
+              }}
+              className="focus-ring flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs text-foreground hover:bg-background-raised disabled:cursor-default disabled:opacity-100"
+            >
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center text-accent">
+                {it.current && <Check className="h-4 w-4" strokeWidth={3} aria-hidden />}
+              </span>
+              <span className={cn("flex-1", it.current && "font-semibold")}>{it.label}</span>
+              {it.hint && <span className="text-[10px] text-foreground-subtle">{it.hint}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

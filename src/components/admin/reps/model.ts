@@ -390,7 +390,11 @@ export function buckets(s: Scope, period: Period, data: ReportData): Bucket[] {
 // ------------------------------------------------------------------ format
 
 export const money = (n: number) =>
-  n >= 100_000 ? `$${(n / 1000).toLocaleString("en-US", { maximumFractionDigits: 0 })}k` : `$${n.toLocaleString("en-US")}`;
+  n >= 1_000_000
+    ? `$${(n / 1_000_000).toLocaleString("en-US", { maximumFractionDigits: n >= 10_000_000 ? 0 : 1 })}M`
+    : n >= 100_000
+      ? `$${Math.round(n / 1000).toLocaleString("en-US")}k`
+      : `$${n.toLocaleString("en-US")}`;
 export const moneyFull = (n: number) => `$${n.toLocaleString("en-US")}`;
 export const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
 export const ratio = (a: number, b: number) => (b ? a / b : 0);
@@ -405,3 +409,38 @@ export function downloadCsv(filename: string, rows: (string | number)[][]) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ------------------------------------------------------------------ deals workspace
+
+/** 0–100 from the seller's own form answers: size of the prize and how soon. */
+export function fitScore(d: Deal): number {
+  const rev: Record<string, number> = {
+    "Under $250,000": 10, "$250,000 - $500,000": 25, "$500,000 - $1 million": 35,
+    "$1 million - $2 million": 40, "$2 million - $5 million": 40, "$5 million+": 40,
+  };
+  const profit: Record<string, number> = {
+    "Under $250,000": 10, "$250,000 - $500,000": 20, "$500,000 - $1 million": 25,
+    "$1 million - $2 million": 30, "$2 million - $5 million": 30, "$5 million+": 30,
+  };
+  const time: Record<string, number> = {
+    "As soon as possible": 30, "Within 3 months": 30, "3-6 months": 20, "6-12 months": 10,
+    "More than 12 months": 5, "Just exploring": 0,
+  };
+  return Math.min(100, (rev[d.revenue] ?? 10) + (profit[d.profit] ?? 5) + (time[d.timeline] ?? 10));
+}
+
+export type FitTier = "hot" | "warm" | "cool";
+export const fitTier = (score: number): FitTier => (score >= 70 ? "hot" : score >= 45 ? "warm" : "cool");
+
+export const SAVED_VIEWS = [
+  { key: "all", label: "All deals", test: () => true },
+  { key: "hot", label: "Hot leads", test: (d: Deal) => d.status === "open" && fitScore(d) >= 70 },
+  { key: "quiet", label: "Gone quiet", test: (d: Deal, now: number) => isQuiet(d, now) && d.group !== "team" },
+  { key: "new", label: "Not worked yet", test: (d: Deal) => d.status === "open" && d.stageIndex === 0 },
+  { key: "financials", label: "Chasing financials", test: (d: Deal) => d.status === "open" && d.group === "financials" },
+  { key: "team", label: "With the team", test: (d: Deal) => d.status === "open" && d.group === "team" },
+  { key: "self", label: "Self-sourced", test: (d: Deal) => d.source === "Rep-sourced" },
+  { key: "won", label: "Won", test: (d: Deal) => d.status === "won" },
+  { key: "lost", label: "Lost", test: (d: Deal) => d.status === "lost" || d.status === "abandoned" },
+] as const;
+export type SavedViewKey = (typeof SAVED_VIEWS)[number]["key"];
