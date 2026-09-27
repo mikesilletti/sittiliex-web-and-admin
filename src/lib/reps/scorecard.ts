@@ -44,6 +44,7 @@ const FIELD = {
   profit: "sYDlwDtCWs2S8PxfkIAl",
   timing: "FJ4N0gAzHSYLYU76BTtA",
   asking: "l8Jvrz6GOtP9ZQ8mQAwI",
+  books: "znCvZexaBKaJiUEXp6F0", // "Are your books clean enough...?" (Facebook form v3)
 };
 const REP_SOURCED_TAG = "rep-sourced";
 const INTERNAL_TAG = "sillettix-internal";
@@ -305,6 +306,7 @@ export async function getReportData(): Promise<ReportData> {
       revenue: formBand(field(c, FIELD.revenue), REVENUE_BANDS),
       profit: formBand(field(c, FIELD.profit), PROFIT_BANDS),
       timeline: formBand(field(c, FIELD.timing), TIMELINES),
+      books: field(c, FIELD.books) || "Not given",
       asking: askingBand(av),
       askingValue: av,
       stage: stages[idx]?.name ?? "Unknown",

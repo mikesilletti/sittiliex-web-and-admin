@@ -80,6 +80,7 @@ export interface Deal {
   revenue: string;
   profit: string;
   timeline: string;
+  books: string; // raw answer, or "Not given"
   asking: string; // band
   askingValue: number | null;
   stage: string;

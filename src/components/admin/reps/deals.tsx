@@ -759,6 +759,7 @@ function DealDrawer({
     ["Profit", deal.profit],
     ["Asking price", deal.askingValue ? moneyFull(deal.askingValue) : "Not given"],
     ["Timeline", deal.timeline],
+    ["Books ready for diligence", deal.books],
   ];
 
   return (
