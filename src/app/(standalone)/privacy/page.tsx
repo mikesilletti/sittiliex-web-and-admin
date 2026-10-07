@@ -9,7 +9,7 @@ import {
 import { COMPANY, LEGAL_LAST_UPDATED } from "@/lib/company";
 
 export const metadata: Metadata = {
-  title: `Privacy Policy — ${COMPANY.brand}`,
+  title: `Privacy Policy | ${COMPANY.brand}`,
   description: `How ${COMPANY.brand} collects, uses, and protects the information you share with us, including mobile numbers used for text messaging.`,
   alternates: { canonical: "/privacy" },
 };
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         eyebrow="Legal"
         title="Privacy Policy"
         lastUpdated={LEGAL_LAST_UPDATED}
-        intro={`This policy explains what ${COMPANY.brand} collects when you contact us, how we use it, and the choices you have — including for text messaging.`}
+        intro={`This policy explains what ${COMPANY.brand} collects when you contact us, how we use it, and the choices you have, including for text messaging.`}
       />
 
       <LegalBody>
@@ -41,16 +41,16 @@ export default function PrivacyPage() {
           <LegalList
             items={[
               <>
-                <strong className="text-foreground">Contact details</strong> — your name, email
+                <strong className="text-foreground">Contact details</strong>: your name, email
                 address, mobile number, company name, and anything you write in a form or chat with
                 us.
               </>,
               <>
-                <strong className="text-foreground">Business details</strong> — information you
+                <strong className="text-foreground">Business details</strong>: information you
                 share about a business you may want to sell.
               </>,
               <>
-                <strong className="text-foreground">Technical data</strong> — IP address, browser
+                <strong className="text-foreground">Technical data</strong>: IP address, browser
                 type, pages visited, and similar information collected automatically when you visit
                 the site.
               </>,
@@ -97,8 +97,8 @@ export default function PrivacyPage() {
         <LegalSection heading="When we share information">
           <p>
             We do not sell your personal information. We share it only with service providers who
-            work on our behalf — such as our website host, email and text messaging platforms, and
-            professional advisors — and only so they can perform that work for us. We may also
+            work on our behalf, such as our website host, email and text messaging platforms, and
+            professional advisors, and only so they can perform that work for us. We may also
             disclose information where the law requires it, or to protect our rights, safety, or
             property.
           </p>

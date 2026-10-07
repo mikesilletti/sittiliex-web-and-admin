@@ -1,5 +1,8 @@
 import { getPublicSupabaseClient } from "@/lib/supabase/server";
 import { sectionRegistry } from "@/lib/section-registry";
+import { Fragment } from "react";
+import { FounderSpotlight } from "@/components/sections/FounderSpotlight";
+import { ScrollToHashOnLoad } from "@/components/motion/ScrollToHashOnLoad";
 import type { SectionRow } from "@/types/content";
 
 export const revalidate = 300;
@@ -20,10 +23,17 @@ export default async function Home() {
 
   return (
     <main>
+      <ScrollToHashOnLoad />
       {sections.map((section) => {
         const Component = sectionRegistry[section.type];
         if (!Component) return null;
-        return <Component key={section.id} content={section.content as never} />;
+        return (
+          <Fragment key={section.id}>
+            <Component content={section.content as never} />
+            {/* Founder teaser sits right after "Why Sell to Us", where owners decide whether to trust us. */}
+            {section.type === "why-sell-to-us" && <FounderSpotlight />}
+          </Fragment>
+        );
       })}
     </main>
   );

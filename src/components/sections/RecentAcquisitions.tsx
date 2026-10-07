@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Lock, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/Container";
@@ -8,6 +10,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import { navHref } from "@/lib/nav-href";
 import { PORTFOLIO_NEXT_DEFAULTS, PORTFOLIO_STATUS_LABELS, acquisitionTiles } from "@/lib/content-defaults";
 import type { PortfolioStatus, RecentAcquisitionsContent } from "@/types/content";
 
@@ -48,6 +51,7 @@ function StepNumber({ n, muted }: { n: number; muted?: boolean }) {
 
 export function RecentAcquisitions({ content }: { content: RecentAcquisitionsContent }) {
   const shouldReduceMotion = useReducedMotion();
+  const pathname = usePathname();
   const tiles = acquisitionTiles(content);
   const nextEyebrow = content.nextEyebrow || PORTFOLIO_NEXT_DEFAULTS.nextEyebrow;
   const nextHeading = content.nextHeading || PORTFOLIO_NEXT_DEFAULTS.nextHeading;
@@ -114,8 +118,8 @@ export function RecentAcquisitions({ content }: { content: RecentAcquisitionsCon
             <RevealOnScroll delay={tiles.length * 0.1}>
               <div className="flex h-full flex-col">
                 <StepNumber n={tiles.length + 1} muted />
-                <a
-                  href={content.cta.href || "#contact"}
+                <Link
+                  href={navHref(content.cta.href || "#contact", pathname)}
                   className="group mt-6 flex min-h-64 flex-1 flex-col justify-center rounded-lg border border-dashed border-accent/40 bg-accent/5 p-6 transition-colors duration-300 hover:bg-accent/10 focus-ring"
                 >
                   <p className="text-xs uppercase tracking-widest text-accent">{nextEyebrow}</p>
@@ -130,7 +134,7 @@ export function RecentAcquisitions({ content }: { content: RecentAcquisitionsCon
                       />
                     </span>
                   )}
-                </a>
+                </Link>
               </div>
             </RevealOnScroll>
           </div>

@@ -7,7 +7,10 @@ import { Logo } from "@/components/ui/Logo";
 import { Container } from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import { MagneticButton } from "@/components/motion/MagneticButton";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useActiveSection } from "@/lib/use-active-section";
+import { navHref } from "@/lib/nav-href";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/types/content";
 
@@ -23,7 +26,11 @@ export function Header({
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const activeHref = useActiveSection(nav.map((item) => item.href));
+  const pathname = usePathname();
+  const activeSection = useActiveSection(nav.map((item) => item.href));
+  // Section anchors only highlight on the landing page; routes highlight on their own page.
+  const isActive = (href: string) =>
+    href.startsWith("#") ? pathname === "/" && activeSection === href : pathname === href;
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 24);
@@ -39,39 +46,39 @@ export function Header({
       )}
     >
       <Container className="flex h-20 items-center justify-between">
-        <a
-          href="#"
+        <Link
+          href="/"
           className="focus-ring rounded-sm transition-transform duration-300 hover:scale-105"
           aria-label="SillettiX home"
         >
           <Logo variant="lockup" height={28} priority />
-        </a>
+        </Link>
 
         <nav className="hidden lg:flex items-center gap-8" aria-label="Primary">
           {nav.map((item) => (
-            <a
+            <Link
               key={item.href}
-              href={item.href}
-              aria-current={activeHref === item.href ? "true" : undefined}
+              href={navHref(item.href, pathname)}
+              aria-current={isActive(item.href) ? "true" : undefined}
               className={cn(
                 "group focus-ring relative rounded-sm text-sm transition-colors hover:text-foreground",
-                activeHref === item.href ? "text-accent" : "text-foreground-muted"
+                isActive(item.href) ? "text-accent" : "text-foreground-muted"
               )}
             >
               {item.label}
               <span
                 className={cn(
                   "absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-300 ease-out group-hover:scale-x-100",
-                  activeHref === item.href && "scale-x-100"
+                  isActive(item.href) && "scale-x-100"
                 )}
               />
-            </a>
+            </Link>
           ))}
         </nav>
 
         <div className="hidden lg:block">
           <MagneticButton strength={0.3}>
-            <ButtonLink href={ctaHref} variant="primary" className="text-xs px-4 py-2.5">
+            <ButtonLink href={navHref(ctaHref, pathname)} variant="primary" className="text-xs px-4 py-2.5">
               {ctaLabel}
             </ButtonLink>
           </MagneticButton>
@@ -107,20 +114,27 @@ export function Header({
           >
             <Container className="flex flex-col gap-1 py-4">
               {nav.map((item, i) => (
-                <motion.a
+                <motion.div
                   key={item.href}
-                  href={item.href}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: i * 0.04 }}
-                  onClick={() => setMobileOpen(false)}
-                  className="focus-ring rounded-sm py-3 text-sm text-foreground-muted transition-colors hover:text-foreground hover:pl-2"
                 >
-                  {item.label}
-                </motion.a>
+                  <Link
+                    href={navHref(item.href, pathname)}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive(item.href) ? "true" : undefined}
+                    className={cn(
+                      "focus-ring block rounded-sm py-3 text-sm transition-colors hover:text-foreground hover:pl-2",
+                      isActive(item.href) ? "text-accent" : "text-foreground-muted"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                </motion.div>
               ))}
               <ButtonLink
-                href={ctaHref}
+                href={navHref(ctaHref, pathname)}
                 variant="primary"
                 className="mt-3 w-full"
                 onClick={() => setMobileOpen(false)}

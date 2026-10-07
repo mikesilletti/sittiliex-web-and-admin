@@ -21,10 +21,10 @@ export interface Option {
 
 const MONEY_RANGES: Option[] = [
   { value: "under_$250,000", label: "Under $250K" },
-  { value: "$250,000–$500,000", label: "$250K – $500K" },
-  { value: "$500,000–$1_million", label: "$500K – $1M" },
-  { value: "$1_million–$2_million", label: "$1M – $2M" },
-  { value: "$2_million–$5_million", label: "$2M – $5M" },
+  { value: "$250,000–$500,000", label: "$250K to $500K" },
+  { value: "$500,000–$1_million", label: "$500K to $1M" },
+  { value: "$1_million–$2_million", label: "$1M to $2M" },
+  { value: "$2_million–$5_million", label: "$2M to $5M" },
   { value: "$5_million+", label: "$5M+" },
 ];
 
@@ -34,14 +34,14 @@ export const PROFIT_OPTIONS = MONEY_RANGES;
 export const TIMING_OPTIONS: Option[] = [
   { value: "as_soon_as_possible", label: "As soon as possible" },
   { value: "within_3_months", label: "Within 3 months" },
-  { value: "3–6_months", label: "3–6 months" },
-  { value: "6–12_months", label: "6–12 months" },
+  { value: "3–6_months", label: "3 to 6 months" },
+  { value: "6–12_months", label: "6 to 12 months" },
   { value: "more_than_12_months", label: "More than 12 months" },
   { value: "just_exploring", label: "Just exploring" },
 ];
 
 export const PARTNER_TYPE_OPTIONS: Option[] = [
-  { value: "operator", label: "Operator / CEO — I want to run a company" },
+  { value: "operator", label: "Operator / CEO: I want to run a company" },
   { value: "investor", label: "Investor / capital partner" },
   { value: "broker", label: "Business broker / M&A advisor" },
   { value: "referral", label: "Referral partner" },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
@@ -9,12 +10,18 @@ const X_MARK_PATH =
 
 export function LoadingScreen() {
   const shouldReduceMotion = useReducedMotion();
-  const [visible, setVisible] = useState(true);
+  // Only a visit that starts on the homepage gets the intro. This component
+  // lives in the shared layout, which stays mounted across client-side page
+  // switches, so it never replays while someone clicks between pages.
+  const pathname = usePathname();
+  const [isEntryOnHome] = useState(() => pathname === "/");
+  const [visible, setVisible] = useState(isEntryOnHome);
   const count = useMotionValue(0);
   const [displayCount, setDisplayCount] = useState(0);
   const barWidth = useTransform(count, (v) => `${v}%`);
 
   useEffect(() => {
+    if (!isEntryOnHome) return;
     if (shouldReduceMotion) {
       // Reduced-motion preference is only knowable client-side; skipping the
       // loading screen post-mount (rather than via a lazy initial state) keeps
@@ -46,7 +53,7 @@ export function LoadingScreen() {
       unsubscribe();
       window.clearTimeout(fallback);
     };
-  }, [shouldReduceMotion, count]);
+  }, [shouldReduceMotion, count, isEntryOnHome]);
 
   useEffect(() => {
     if (!visible) {
@@ -54,7 +61,7 @@ export function LoadingScreen() {
     }
   }, [visible]);
 
-  if (shouldReduceMotion) return null;
+  if (shouldReduceMotion || !isEntryOnHome) return null;
 
   return (
     <AnimatePresence>

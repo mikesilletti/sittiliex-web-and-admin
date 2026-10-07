@@ -1,5 +1,7 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { isInternalRoute } from "@/lib/nav-href";
 
 const base =
   "group focus-ring relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-3 text-sm font-medium transition-all duration-300 whitespace-nowrap active:scale-[0.97] hover:scale-[1.02]";
@@ -34,11 +36,25 @@ export function Button({ variant = "primary", className, children, ...props }: B
   );
 }
 
-export function ButtonLink({ variant = "primary", className, children, ...props }: LinkProps & { children?: ReactNode }) {
-  return (
-    <a className={cn(base, variants[variant], className)} {...props}>
+export function ButtonLink({ variant = "primary", className, children, href, ...props }: LinkProps & { children?: ReactNode }) {
+  const inner = (
+    <>
       <Shine />
       <span className="relative flex items-center gap-2">{children}</span>
+    </>
+  );
+  // Internal pages navigate client-side so the shared layout (and its
+  // first-visit loading screen) isn't torn down and replayed.
+  if (isInternalRoute(href)) {
+    return (
+      <Link href={href} className={cn(base, variants[variant], className)} {...props}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <a href={href} className={cn(base, variants[variant], className)} {...props}>
+      {inner}
     </a>
   );
 }

@@ -43,9 +43,10 @@ export function Hero({ content }: { content: HeroContent }) {
           src={hero.backgroundImage}
           alt={hero.backgroundImageAlt}
           className="absolute inset-0"
-          imgClassName="opacity-80"
+          imgClassName="opacity-55"
           strength={80}
           priority
+          quality={90}
         />
       </motion.div>
       <div
@@ -53,7 +54,7 @@ export function Hero({ content }: { content: HeroContent }) {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(90deg, var(--color-background) 5%, rgba(7,9,12,0.75) 35%, rgba(7,9,12,0.25) 70%, rgba(7,9,12,0.55) 100%)",
+            "linear-gradient(90deg, var(--color-background) 8%, rgba(7,9,12,0.85) 40%, rgba(7,9,12,0.45) 72%, rgba(7,9,12,0.65) 100%)",
         }}
       />
       <div

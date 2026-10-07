@@ -9,7 +9,7 @@ import {
 import { COMPANY, LEGAL_LAST_UPDATED } from "@/lib/company";
 
 export const metadata: Metadata = {
-  title: `Terms & Conditions — ${COMPANY.brand}`,
+  title: `Terms & Conditions | ${COMPANY.brand}`,
   description: `The terms that apply when you use the ${COMPANY.brand} website or exchange text messages with our team.`,
   alternates: { canonical: "/terms" },
 };
@@ -79,8 +79,8 @@ export default function TermsPage() {
           <p>
             We treat inquiries about your business as confidential and share them only within our
             team and with advisors who need them to evaluate a possible transaction. Please do not
-            send sensitive financial records or personal identifiers through the website or by text
-            — we will arrange a secure channel when the conversation gets there.
+            send sensitive financial records or personal identifiers through the website or by text.
+            We will arrange a secure channel when the conversation gets there.
           </p>
         </LegalSection>
 
@@ -105,8 +105,8 @@ export default function TermsPage() {
 
         <LegalSection heading="Third-party services and links">
           <p>
-            The site uses third-party services — including the chat and messaging widget on our text
-            messaging page — and may link to other sites. We do not control those services or sites
+            The site uses third-party services, including the chat and messaging widget on our text
+            messaging page, and may link to other sites. We do not control those services or sites
             and are not responsible for their content or their privacy practices.
           </p>
         </LegalSection>

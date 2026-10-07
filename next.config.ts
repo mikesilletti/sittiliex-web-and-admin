@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // 75 is the default for every image; 90 is used for the full-screen hero
+    // and the large founder portraits, where 75 visibly softens them.
+    qualities: [75, 90],
     remotePatterns: [
       {
         protocol: "https",

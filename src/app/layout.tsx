@@ -11,10 +11,10 @@ function safeHex(value: string | null | undefined, fallback: string) {
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  const title = settings?.seo_site_title ?? "SillettiX — Acquiring Businesses Built to Last";
+  const title = settings?.seo_site_title ?? "SillettiX | Acquiring Businesses Built to Last";
   const description =
     settings?.seo_meta_description ??
-    "SillettiX is a permanent-capital holding company acquiring profitable, founder-led businesses and operating them for decades — not private equity, not a broker.";
+    "SillettiX is an operator-led holding company that acquires profitable, owner-built businesses and helps them grow. Not private equity, not a broker.";
 
   return {
     metadataBase: new URL("https://sillettix.com"),

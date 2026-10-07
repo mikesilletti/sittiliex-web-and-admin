@@ -14,6 +14,7 @@ export function ParallaxImage({
   strength = 60,
   priority,
   sizes,
+  quality,
 }: {
   src: string;
   alt: string;
@@ -22,6 +23,8 @@ export function ParallaxImage({
   strength?: number;
   priority?: boolean;
   sizes?: string;
+  /** Encode quality; must be listed in next.config images.qualities. */
+  quality?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -43,6 +46,7 @@ export function ParallaxImage({
           fill
           priority={priority}
           sizes={sizes ?? "100vw"}
+          quality={quality}
           className={cn("object-cover", imgClassName)}
         />
       </motion.div>

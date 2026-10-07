@@ -29,8 +29,8 @@ export const CONTACT_COPY_DEFAULTS = {
   submitLabel: "Send Message",
   submittingLabel: "Sending…",
   successHeading: "Message received.",
-  successMessage: "Thank you for reaching out — we'll be in touch soon, in complete confidence.",
-  errorMessage: "Something went wrong — please try again or email us directly.",
+  successMessage: "Thank you for reaching out. We'll be in touch soon, in complete confidence.",
+  errorMessage: "Something went wrong. Please try again or email us directly.",
 } satisfies Partial<Record<keyof ContactContent, string>>;
 
 export type ContactCopyKey = keyof typeof CONTACT_COPY_DEFAULTS;

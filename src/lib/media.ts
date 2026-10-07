@@ -6,7 +6,7 @@ export const SITE_MEDIA_PUBLIC_PREFIX =
   "https://qomizjeefzyrfmwnxhgz.supabase.co/storage/v1/object/public/site-media/";
 
 export const IMAGE_PATH_HINT =
-  "Upload the image or use a site image path (e.g. /images/…) — external image URLs aren't supported.";
+  "Upload the image or use a site image path (e.g. /images/…). External image URLs aren't supported.";
 
 /** Empty means "not set yet"; otherwise local public/ paths or bucket uploads only. */
 export function isAllowedImagePath(value: string): boolean {

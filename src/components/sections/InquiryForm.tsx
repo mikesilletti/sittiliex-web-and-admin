@@ -35,7 +35,7 @@ export interface InquiryFormCopy {
 }
 
 const PATHS: { type: InquiryType; icon: typeof Briefcase; blurb: string }[] = [
-  { type: "sell", icon: Briefcase, blurb: "Find out what your business could sell for — confidentially." },
+  { type: "sell", icon: Briefcase, blurb: "Find out, confidentially, what your business could sell for." },
   { type: "partner", icon: Handshake, blurb: "Operators, investors, brokers and referral partners." },
   { type: "other", icon: MessageSquare, blurb: "Questions, press, or anything else." },
 ];

@@ -13,7 +13,7 @@ import { SmsChatWidget } from "@/components/sms/SmsChatWidget";
 import { COMPANY } from "@/lib/company";
 
 export const metadata: Metadata = {
-  title: `Text ${COMPANY.brand} — SMS Opt-In`,
+  title: `Text ${COMPANY.brand} | SMS Opt-In`,
   description: `Start a confidential conversation with ${COMPANY.brand} by text. Opt in through the chat widget to receive messages from our team.`,
   alternates: { canonical: "/sms" },
 };
@@ -32,7 +32,7 @@ const STEPS = [
   {
     n: "03",
     title: "We text you back",
-    body: "A member of our team replies directly — confidentially, and without obligation.",
+    body: "A member of our team replies directly, confidentially and without obligation.",
   },
 ];
 
@@ -85,7 +85,7 @@ export default function SmsPage() {
           <RevealOnScroll delay={0.6}>
             <p className="mt-8 max-w-xl text-body-lg text-foreground-muted text-balance">
               Selling a business starts with a quiet conversation. Opt in through the chat on this
-              page and a member of the {COMPANY.brand} team will text you directly — confidentially,
+              page and a member of the {COMPANY.brand} team will text you directly, confidentially
               and with no obligation.
             </p>
           </RevealOnScroll>

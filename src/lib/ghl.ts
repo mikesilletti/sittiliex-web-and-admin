@@ -80,7 +80,7 @@ function splitName(full: string) {
 }
 
 function noteBody(values: InquiryValues): string | null {
-  const lines = [`Website inquiry — ${INQUIRY_TYPE_LABELS[values.type]}`];
+  const lines = [`Website inquiry: ${INQUIRY_TYPE_LABELS[values.type]}`];
   if (values.type === "partner") {
     lines.push(`${DETAIL_LABELS.partnerType}: ${detailValueLabel("partnerType", values.partnerType)}`);
     if (values.linkedin) lines.push(`${DETAIL_LABELS.linkedin}: ${values.linkedin}`);
