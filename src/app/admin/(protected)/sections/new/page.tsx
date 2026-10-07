@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { sectionLabels } from "@/lib/section-registry";
+import { isPageOnlyType, sectionDescriptions, sectionLabels } from "@/lib/section-registry";
 import { createSection } from "@/lib/admin/section-actions";
 import type { SectionType } from "@/types/content";
 
-const sectionTypes = Object.keys(sectionLabels) as SectionType[];
+// Page-only types (the About page) exist once and are edited from the list, never added.
+const sectionTypes = (Object.keys(sectionLabels) as SectionType[]).filter((type) => !isPageOnlyType(type));
 
 export default function NewSectionPage() {
   return (
@@ -24,6 +25,7 @@ export default function NewSectionPage() {
               className="focus-ring w-full rounded-md border border-border bg-background-raised px-5 py-4 text-left text-sm font-medium text-foreground transition-colors hover:border-accent/40"
             >
               {sectionLabels[type]}
+              <span className="mt-1 block text-xs font-normal text-foreground-subtle">{sectionDescriptions[type]}</span>
             </button>
           </form>
         ))}

@@ -19,7 +19,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { sectionLabels } from "@/lib/section-registry";
+import { sectionDescriptions, sectionLabels, sectionViewPaths } from "@/lib/section-registry";
 import {
   reorderSections,
   toggleSectionVisibility,
@@ -62,9 +62,25 @@ function SectionRowItem({
       </button>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground">{sectionLabels[section.type]}</p>
-        {!section.is_visible && <p className="text-xs text-foreground-subtle">Hidden</p>}
+        <p className="text-sm font-medium text-foreground">
+          {sectionLabels[section.type]}
+          {!section.is_visible && (
+            <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-foreground-subtle">
+              Hidden
+            </span>
+          )}
+        </p>
+        <p className="mt-0.5 truncate text-xs text-foreground-subtle">{sectionDescriptions[section.type]}</p>
       </div>
+
+      <a
+        href={sectionViewPaths[section.type]}
+        target="_blank"
+        rel="noreferrer"
+        className="focus-ring hidden rounded-sm px-2 py-1 text-xs text-foreground-muted hover:text-foreground sm:inline"
+      >
+        View
+      </a>
 
       <button
         type="button"

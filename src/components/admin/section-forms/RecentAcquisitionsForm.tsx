@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
+import { PageSeoFields } from "@/components/admin/PageSeoFields";
+import { PAGE_SEO_DEFAULTS } from "@/lib/page-content-defaults";
 import { RepeatableList } from "@/components/admin/RepeatableList";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Select, Textarea } from "@/components/ui/Input";
@@ -142,6 +144,17 @@ export function RecentAcquisitionsForm({
           </div>
         </div>
       </Field>
+
+      <PageSeoFields
+        path={PAGE_SEO_DEFAULTS["recent-acquisitions"].path}
+        title={state.pageTitle}
+        description={state.pageDescription}
+        defaults={PAGE_SEO_DEFAULTS["recent-acquisitions"]}
+        onChange={(patch) => {
+          setState((prev) => ({ ...prev, ...patch }));
+          setStatus("idle");
+        }}
+      />
 
       <SaveBar isPending={isPending} status={status} onSave={save} errorMessage={saveError} />
     </div>

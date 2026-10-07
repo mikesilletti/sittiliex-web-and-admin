@@ -71,7 +71,7 @@ export async function restoreSectionVersion(versionId: string): Promise<{ error:
     await snapshotSection(supabase, restored as SectionRow, "restore");
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/sections");
   return { error: null };
 }
@@ -111,7 +111,7 @@ export async function restoreSettingsVersion(versionId: string): Promise<{ error
     .eq("id", 1);
   if (error) return { error: error.message };
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath(`/admin/${version.scope}`);
   return { error: null };
 }

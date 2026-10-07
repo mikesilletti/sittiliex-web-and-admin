@@ -9,6 +9,8 @@ import { AcquisitionProcessForm } from "@/components/admin/section-forms/Acquisi
 import { RecentAcquisitionsForm } from "@/components/admin/section-forms/RecentAcquisitionsForm";
 import { FaqForm } from "@/components/admin/section-forms/FaqForm";
 import { ContactForm } from "@/components/admin/section-forms/ContactForm";
+import { FounderSpotlightForm } from "@/components/admin/section-forms/FounderSpotlightForm";
+import { AboutPageForm } from "@/components/admin/section-forms/AboutPageForm";
 
 export const formRegistry: {
   [K in SectionType]: ComponentType<{ id: string; content: SectionContentMap[K] }>;
@@ -22,4 +24,6 @@ export const formRegistry: {
   "recent-acquisitions": RecentAcquisitionsForm,
   faq: FaqForm,
   contact: ContactForm,
+  "founder-spotlight": FounderSpotlightForm,
+  "about-page": AboutPageForm,
 };

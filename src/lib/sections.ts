@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { cache } from "react";
 import { getPublicSupabaseClient } from "@/lib/supabase/server";
+import { PAGE_SEO_DEFAULTS, type SeoPageSectionType } from "@/lib/page-content-defaults";
 import type { SectionContentMap, SectionType } from "@/types/content";
 
 /**
@@ -23,3 +25,14 @@ export const getSectionContent = cache(
     return (data?.content as SectionContentMap[T] | undefined) ?? null;
   }
 );
+
+/** Metadata for a standalone section page: the admin's page title/description, else the defaults. */
+export async function sectionPageMetadata(type: SeoPageSectionType): Promise<Metadata> {
+  const content = await getSectionContent(type);
+  const defaults = PAGE_SEO_DEFAULTS[type];
+  return {
+    title: content?.pageTitle || defaults.title,
+    description: content?.pageDescription || defaults.description,
+    alternates: { canonical: defaults.path },
+  };
+}

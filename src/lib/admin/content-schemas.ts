@@ -14,6 +14,9 @@ const imagePath = z.string().max(1000).refine(isAllowedImagePath, IMAGE_PATH_HIN
 const emailOrBlank = z.union([z.literal(""), z.string().email().max(200)]);
 
 const cta = z.object({ label: short, href });
+const fact = z.object({ id: short, label: short, value: short });
+// Search title/description for a section's standalone page (/faq, /contact, /acquisitions).
+const pageSeo = { pageTitle: short.optional(), pageDescription: long.optional() };
 
 const heroSchema = z.object({
   eyebrow: short,
@@ -90,12 +93,14 @@ const recentAcquisitionsSchema = z.object({
   nextEyebrow: short.optional(),
   nextHeading: short.optional(),
   nextBody: long.optional(),
+  ...pageSeo,
 });
 
 const faqSchema = z.object({
   eyebrow: short,
   heading: short,
   items: z.array(z.object({ id: short, question: short, answer: long })).max(50),
+  ...pageSeo,
 });
 
 const contactSchema = z.object({
@@ -116,6 +121,50 @@ const contactSchema = z.object({
   successHeading: short.optional(),
   successMessage: long.optional(),
   errorMessage: long.optional(),
+  ...pageSeo,
+});
+
+const founderSpotlightSchema = z.object({
+  eyebrow: short,
+  heading: short,
+  body: long,
+  image: imagePath,
+  imageAlt: short,
+  facts: z.array(fact).max(6),
+  linkLabel: short,
+  linkHref: href,
+});
+
+const aboutPageSchema = z.object({
+  seoTitle: short,
+  seoDescription: long,
+  heroBadge: short,
+  headingLead: short,
+  headingAccent: short,
+  heroIntro: long,
+  heroImage: imagePath,
+  heroImageAlt: short,
+  heroFacts: z.array(fact).max(6),
+  heroCta: cta,
+  statement: long,
+  storyImage: imagePath,
+  storyImageAlt: short,
+  storyCaption: short,
+  chapters: z.array(z.object({ id: short, tag: short, title: short, body: long })).max(20),
+  playbookEyebrow: short,
+  playbookHeading: short,
+  playbookIntro: long,
+  playbook: z.array(z.object({ id: short, title: short, description: long })).max(20),
+  qaEyebrow: short,
+  qaHeading: short,
+  qaInitials: z.string().max(10),
+  qa: z.array(z.object({ id: short, question: short, answer: long })).max(20),
+  ctaEyebrow: short,
+  ctaHeading: short,
+  ctaBody: long,
+  ctaImage: imagePath,
+  ctaButton: cta,
+  ctaPhoneLabel: short,
 });
 
 const schemas: Record<SectionType, z.ZodTypeAny> = {
@@ -128,6 +177,8 @@ const schemas: Record<SectionType, z.ZodTypeAny> = {
   "recent-acquisitions": recentAcquisitionsSchema,
   faq: faqSchema,
   contact: contactSchema,
+  "founder-spotlight": founderSpotlightSchema,
+  "about-page": aboutPageSchema,
 };
 
 export const sectionTypeSchema = z.enum([
@@ -140,6 +191,8 @@ export const sectionTypeSchema = z.enum([
   "recent-acquisitions",
   "faq",
   "contact",
+  "founder-spotlight",
+  "about-page",
 ]);
 
 export function contentSchemaFor(type: SectionType): z.ZodTypeAny {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formRegistry } from "@/lib/admin/form-registry";
-import { sectionLabels } from "@/lib/section-registry";
+import { sectionDescriptions, sectionLabels, sectionViewPaths } from "@/lib/section-registry";
 import { restoreSectionVersion } from "@/lib/admin/version-actions";
 import { VersionHistory } from "@/components/admin/VersionHistory";
 import type { SectionRow, SectionVersion } from "@/types/content";
@@ -47,9 +47,20 @@ export default async function EditSectionPage({
       <Link href="/admin/sections" className="text-xs text-foreground-muted hover:text-foreground">
         ← Sections
       </Link>
-      <h1 className="mt-2 text-display-sm font-heading text-foreground">
-        Edit {sectionLabels[section.type]}
-      </h1>
+      <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-display-sm font-heading text-foreground">Edit {sectionLabels[section.type]}</h1>
+          <p className="mt-1 text-body-sm text-foreground-muted">{sectionDescriptions[section.type]}</p>
+        </div>
+        <a
+          href={sectionViewPaths[section.type]}
+          target="_blank"
+          rel="noreferrer"
+          className="focus-ring rounded-sm border border-border-strong px-3 py-1.5 text-xs text-foreground-muted hover:border-accent/40 hover:text-foreground"
+        >
+          View on site ↗
+        </a>
+      </div>
 
       <div className="mt-8">
         {/* Key on updated_at: after a restore, router.refresh() must remount

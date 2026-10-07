@@ -2,11 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+
+// revalidatePath("/", "layout") refreshes every public page, not just the
+// homepage: sections also render on /about, /faq, /contact and /acquisitions,
+// and settings feed the header and footer everywhere.
 import { requireAdminSession } from "@/lib/auth/require-admin";
 import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { defaultContentFor } from "@/lib/admin/default-content";
 import { contentSchemaFor, sectionTypeSchema } from "@/lib/admin/content-schemas";
 import { snapshotSection } from "@/lib/admin/versioning";
+import { isPageOnlyType } from "@/lib/section-registry";
 import type { SectionContentMap, SectionRow, SectionType } from "@/types/content";
 
 export async function reorderSections(orderedIds: string[]): Promise<{ error: string | null }> {
@@ -20,7 +25,7 @@ export async function reorderSections(orderedIds: string[]): Promise<{ error: st
   const { error } = await supabase.rpc("reorder_sections", { ids: orderedIds });
   if (error) return { error: error.message };
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/sections");
   return { error: null };
 }
@@ -32,7 +37,7 @@ export async function toggleSectionVisibility(id: string, isVisible: boolean): P
   const { error } = await supabase.from("sections").update({ is_visible: isVisible }).eq("id", id);
   if (error) throw new Error(error.message);
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/sections");
 }
 
@@ -55,7 +60,7 @@ export async function deleteSection(id: string): Promise<void> {
   const { error } = await supabase.from("sections").delete().eq("id", id);
   if (error) throw new Error(error.message);
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/sections");
 }
 
@@ -66,6 +71,17 @@ export async function createSection(type: SectionType): Promise<never> {
   if (!parsedType.success) throw new Error("Invalid section type.");
 
   const supabase = getAdminSupabaseClient();
+
+  // A page-only section (the About page) exists once; open it instead of adding a duplicate.
+  if (isPageOnlyType(parsedType.data)) {
+    const { data: current } = await supabase
+      .from("sections")
+      .select("id")
+      .eq("type", parsedType.data)
+      .limit(1)
+      .maybeSingle();
+    if (current) redirect(`/admin/sections/${current.id}`);
+  }
 
   const { data: existing } = await supabase
     .from("sections")
@@ -122,7 +138,7 @@ export async function updateSectionContent<T extends SectionType>(
     .eq("id", id);
   if (error) return { error: error.message };
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath(`/admin/sections/${id}`);
   return { error: null };
 }

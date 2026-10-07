@@ -8,78 +8,32 @@ import { MagneticButton } from "@/components/motion/MagneticButton";
 import { ScrubStatement } from "@/components/about/ScrubStatement";
 import { getSiteSettings } from "@/lib/site-settings";
 import { COMPANY, toTelHref } from "@/lib/company";
+import { getSectionContent } from "@/lib/sections";
+import { ABOUT_PAGE_DEFAULTS } from "@/lib/page-content-defaults";
+import type { AboutPageContent } from "@/types/content";
 
-export const metadata: Metadata = {
-  title: "About Michael Silletti | SillettiX",
-  description:
-    "Meet Michael Silletti, the operator who built and scaled Clensy with his own systems and sales playbook. Now he buys good businesses, makes them great and takes them to the next level.",
-  alternates: { canonical: "/about" },
-  openGraph: { images: ["/images/michael-silletti-hero-4k.webp"] },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getAboutContent();
+  return {
+    title: c.seoTitle || ABOUT_PAGE_DEFAULTS.seoTitle,
+    description: c.seoDescription || ABOUT_PAGE_DEFAULTS.seoDescription,
+    alternates: { canonical: "/about" },
+    openGraph: c.heroImage ? { images: [c.heroImage] } : undefined,
+  };
+}
 
 export const revalidate = 300;
 
 // Portraits are large on screen; 75 (the default) visibly softens them.
 const PHOTO_QUALITY = 90;
 
-const STORY = [
-  {
-    tag: "The builder",
-    title: "He built Clensy. Then he scaled it fast.",
-    body: "Michael didn't inherit a playbook. He wrote one. At Clensy he built the systems and procedures from scratch: hiring, training, scheduling, quality control and pricing. Then he used them to scale the company quickly without losing the standard customers counted on.",
-  },
-  {
-    tag: "The operating system",
-    title: "Every number tracked. Every process automated.",
-    body: "Michael runs businesses on data. Clear KPIs for every role and every job, dashboards that show exactly what's working, and technology that automates the busywork: follow-ups, scheduling, invoicing and reporting. Paired with his sales and marketing background, it turns a good reputation into predictable growth.",
-  },
-  {
-    tag: "The acquirer",
-    title: "Now he does it for businesses like yours.",
-    body: "SillettiX buys good, owner-built businesses and makes them great. It brings the same systems, technology and growth playbook that built Clensy and takes each company to the next level.",
-  },
-];
-
-const PLAYBOOK = [
-  {
-    title: "Systems & procedures",
-    body: "Documented playbooks for hiring, training, operations and quality, so the business runs on systems, not on one person.",
-  },
-  {
-    title: "KPIs on everything",
-    body: "Clear numbers for every role, every job and every customer. Decisions come from data, not guesswork.",
-  },
-  {
-    title: "Tech & automation",
-    body: "Modern software automates follow-ups, scheduling, invoicing and reporting, which frees the team to do great work.",
-  },
-  {
-    title: "Built to scale",
-    body: "Predictable lead flow, more capacity, new services. Growth that compounds because the foundation is built to hold it.",
-  },
-];
-
-const QA = [
-  {
-    q: "What happens to my team?",
-    a: "They stay, and they get better tools, clearer systems and more support. Your people are the business.",
-  },
-  {
-    q: "What will you actually change?",
-    a: "I keep what works and build on it: systems that take pressure off, clear goals for every role, and technology that automates the busywork so your team can focus on customers.",
-  },
-  {
-    q: "Who will I actually be talking to?",
-    a: "Me. No layers, no games. You'll get straight answers and know where you stand quickly.",
-  },
-  {
-    q: "Is this private equity in disguise?",
-    a: "No. There's no fund behind me pushing to cut costs and resell fast. I'm an operator. I buy good companies to build them up, not to strip them down.",
-  },
-];
+/** The About page's content row, or the built-in copy if it hasn't been created yet. */
+async function getAboutContent(): Promise<AboutPageContent> {
+  return (await getSectionContent("about-page")) ?? ABOUT_PAGE_DEFAULTS;
+}
 
 export default async function AboutPage() {
-  const settings = await getSiteSettings();
+  const [settings, c] = await Promise.all([getSiteSettings(), getAboutContent()]);
   const phone = settings?.contact_phone || COMPANY.phone;
 
   return (
@@ -88,9 +42,9 @@ export default async function AboutPage() {
       <section className="relative lg:min-h-[100svh]">
         <div className="relative h-[70svh] w-full lg:absolute lg:inset-y-0 lg:left-0 lg:h-auto lg:w-[56%] lg:[mask-image:linear-gradient(to_right,black_55%,transparent_99%)]">
           <Image
-            src="/images/michael-silletti-hero-4k.webp"
+            src={c.heroImage || ABOUT_PAGE_DEFAULTS.heroImage}
             quality={PHOTO_QUALITY}
-            alt="Michael Silletti, founder of SillettiX"
+            alt={c.heroImageAlt}
             fill
             priority
             sizes="(min-width: 1024px) 55vw, 100vw"
@@ -105,30 +59,28 @@ export default async function AboutPage() {
             <RevealOnScroll>
               <p className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-background/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent backdrop-blur">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-                Founder, SillettiX
+                {c.heroBadge}
               </p>
             </RevealOnScroll>
             <RevealOnScroll delay={0.05}>
               <h1 className="mt-6 font-heading text-6xl font-extrabold leading-[0.95] tracking-tight text-foreground md:text-7xl xl:text-8xl">
-                Meet <span className="text-accent">Michael.</span>
+                {c.headingLead} <span className="text-accent">{c.headingAccent}</span>
               </h1>
             </RevealOnScroll>
             <RevealOnScroll delay={0.1}>
               <p className="mt-6 max-w-lg text-xl leading-relaxed text-foreground-muted md:text-2xl">
-                The operator who built and rapidly scaled Clensy with his own systems and a sales-and-marketing
-                engine. Now he takes good businesses and makes them great.
+                {c.heroIntro}
               </p>
             </RevealOnScroll>
             <RevealOnScroll delay={0.15}>
-              <dl className="mt-10 grid max-w-lg grid-cols-3 divide-x divide-border border-y border-border">
-                {[
-                  ["Built & scaled", "Clensy"],
-                  ["Runs on", "Systems"],
-                  ["The goal", "Next level"],
-                ].map(([k, v]) => (
-                  <div key={k} className="px-4 py-4 first:pl-0">
-                    <dt className="text-[11px] uppercase tracking-widest text-foreground-subtle">{k}</dt>
-                    <dd className="mt-1 font-heading text-lg font-bold text-foreground">{v}</dd>
+              <dl
+                className="mt-10 grid max-w-lg divide-x divide-border border-y border-border"
+                style={{ gridTemplateColumns: `repeat(${Math.max(c.heroFacts.length, 1)}, minmax(0, 1fr))` }}
+              >
+                {c.heroFacts.map((fact) => (
+                  <div key={fact.id} className="px-4 py-4 first:pl-0">
+                    <dt className="text-[11px] uppercase tracking-widest text-foreground-subtle">{fact.label}</dt>
+                    <dd className="mt-1 font-heading text-lg font-bold text-foreground">{fact.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -136,8 +88,8 @@ export default async function AboutPage() {
             <RevealOnScroll delay={0.2}>
               <div className="mt-10 flex flex-wrap gap-3">
                 <MagneticButton>
-                  <ButtonLink href="/contact" variant="primary">
-                    Talk to me directly <ArrowRight size={16} />
+                  <ButtonLink href={c.heroCta.href || "/contact"} variant="primary">
+                    {c.heroCta.label} <ArrowRight size={16} />
                   </ButtonLink>
                 </MagneticButton>
                 <ButtonLink href={toTelHref(phone)} variant="secondary">
@@ -152,7 +104,7 @@ export default async function AboutPage() {
       {/* ── Statement ─────────────────────────────────────────── */}
       <section className="border-t border-border py-28 md:py-40">
         <Container>
-          <ScrubStatement text="Good businesses become *great* ones when they run on *systems,* *data* and *technology,* not on one person working around the clock." />
+          <ScrubStatement text={c.statement} />
         </Container>
       </section>
 
@@ -164,24 +116,24 @@ export default async function AboutPage() {
               <RevealOnScroll>
                 <div className="relative h-[60svh] overflow-hidden rounded-2xl lg:h-[calc(100svh-9rem)]">
                   <Image
-                    src="/images/michael-silletti-office-4k.webp"
+                    src={c.storyImage || ABOUT_PAGE_DEFAULTS.storyImage}
                     quality={PHOTO_QUALITY}
-                    alt="Michael Silletti at his desk"
+                    alt={c.storyImageAlt}
                     fill
                     sizes="(min-width: 1024px) 45vw, 100vw"
                     className="object-cover object-[50%_20%]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
                   <p className="absolute bottom-6 left-6 right-6 font-heading text-2xl font-bold text-foreground">
-                    The builder behind SillettiX.
+                    {c.storyCaption}
                   </p>
                 </div>
               </RevealOnScroll>
             </div>
 
             <ol className="relative flex flex-col gap-16 border-l border-border pl-8 lg:gap-24 lg:py-10">
-              {STORY.map((chapter, i) => (
-                <RevealOnScroll key={chapter.tag}>
+              {c.chapters.map((chapter, i) => (
+                <RevealOnScroll key={chapter.id}>
                   <li className="relative">
                     <span className="absolute -left-[45px] top-1 flex h-7 w-7 items-center justify-center rounded-full border border-accent bg-background font-heading text-xs font-bold text-accent">
                       {i + 1}
@@ -209,24 +161,24 @@ export default async function AboutPage() {
         <Container className="relative">
           <RevealOnScroll>
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-eyebrow uppercase text-accent">What he brings</p>
+              <p className="text-eyebrow uppercase text-accent">{c.playbookEyebrow}</p>
               <h2 className="mt-4 text-display-sm md:text-display-md font-heading text-foreground text-balance">
-                The Michael Silletti playbook.
+                {c.playbookHeading}
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-body-lg text-foreground-muted text-balance">
-                The same four things that scaled Clensy, applied to every business SillettiX acquires.
+                {c.playbookIntro}
               </p>
             </div>
           </RevealOnScroll>
           <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-            {PLAYBOOK.map((item, i) => (
-              <RevealOnScroll key={item.title} delay={i * 0.08}>
+            {c.playbook.map((item, i) => (
+              <RevealOnScroll key={item.id} delay={i * 0.08}>
                 <div className="group relative border-t-2 border-border pt-6 transition-colors duration-500 hover:border-accent">
                   <span className="font-heading text-5xl font-extrabold text-accent/30 transition-colors duration-500 group-hover:text-accent">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <h3 className="mt-4 text-xl font-heading font-bold text-foreground">{item.title}</h3>
-                  <p className="mt-3 text-body-md leading-relaxed text-foreground-muted">{item.body}</p>
+                  <p className="mt-3 text-body-md leading-relaxed text-foreground-muted">{item.description}</p>
                 </div>
               </RevealOnScroll>
             ))}
@@ -239,20 +191,22 @@ export default async function AboutPage() {
         <Container>
           <RevealOnScroll>
             <div className="mx-auto max-w-2xl text-center">
-              <p className="text-eyebrow uppercase text-accent">Owner to owner</p>
+              <p className="text-eyebrow uppercase text-accent">{c.qaEyebrow}</p>
               <h2 className="mt-4 text-display-sm md:text-display-md font-heading text-foreground">
-                The questions every owner asks Michael.
+                {c.qaHeading}
               </h2>
             </div>
           </RevealOnScroll>
           <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-2">
-            {QA.map((item, i) => (
-              <RevealOnScroll key={item.q} delay={i * 0.06}>
+            {c.qa.map((item, i) => (
+              <RevealOnScroll key={item.id} delay={i * 0.06}>
                 <div className="h-full bg-background p-8 md:p-10">
-                  <p className="font-heading text-xl font-bold text-foreground">&ldquo;{item.q}&rdquo;</p>
+                  <p className="font-heading text-xl font-bold text-foreground">&ldquo;{item.question}&rdquo;</p>
                   <p className="mt-4 flex gap-3 text-body-md leading-relaxed text-foreground-muted">
-                    <span className="mt-0.5 shrink-0 font-heading text-sm font-bold text-accent">MS</span>
-                    {item.a}
+                    {c.qaInitials && (
+                      <span className="mt-0.5 shrink-0 font-heading text-sm font-bold text-accent">{c.qaInitials}</span>
+                    )}
+                    {item.answer}
                   </p>
                 </div>
               </RevealOnScroll>
@@ -263,33 +217,24 @@ export default async function AboutPage() {
 
       {/* ── Closing CTA over photo ────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <Image
-          src="/images/acquisition-handshake.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover opacity-35"
-        />
+        {c.ctaImage && <Image src={c.ctaImage} alt="" fill sizes="100vw" className="object-cover opacity-35" />}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
         <Container className="relative py-28 md:py-40">
           <RevealOnScroll>
             <div className="max-w-2xl">
-              <p className="text-eyebrow uppercase text-accent">Your next chapter</p>
+              <p className="text-eyebrow uppercase text-accent">{c.ctaEyebrow}</p>
               <h2 className="mt-4 font-heading text-5xl font-extrabold leading-[1.02] tracking-tight text-foreground md:text-7xl">
-                Ready to take your business to the next level?
+                {c.ctaHeading}
               </h2>
-              <p className="mt-6 max-w-xl text-body-lg text-foreground-muted">
-                Let&apos;s talk about what Michael&apos;s playbook could do for what you&apos;ve built. It&apos;s confidential, with
-                no pressure and no obligation.
-              </p>
+              <p className="mt-6 max-w-xl text-body-lg text-foreground-muted">{c.ctaBody}</p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <MagneticButton>
-                  <ButtonLink href="/contact" variant="primary">
-                    What&apos;s My Business Worth? <ArrowRight size={16} />
+                  <ButtonLink href={c.ctaButton.href || "/contact"} variant="primary">
+                    {c.ctaButton.label} <ArrowRight size={16} />
                   </ButtonLink>
                 </MagneticButton>
                 <ButtonLink href={toTelHref(phone)} variant="secondary">
-                  <Phone size={16} /> Call {phone}
+                  <Phone size={16} /> {c.ctaPhoneLabel ? `${c.ctaPhoneLabel} ${phone}` : phone}
                 </ButtonLink>
               </div>
             </div>

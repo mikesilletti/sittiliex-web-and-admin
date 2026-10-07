@@ -119,12 +119,18 @@ export interface RecentAcquisitionsContent {
   nextEyebrow?: string;
   nextHeading?: string;
   nextBody?: string;
+  /** Search title and description for this section's standalone page. Blank uses the built-in default. */
+  pageTitle?: string;
+  pageDescription?: string;
 }
 
 export interface FaqContent {
   eyebrow: string;
   heading: string;
   items: FaqItem[];
+  /** Search title and description for this section's standalone page. Blank uses the built-in default. */
+  pageTitle?: string;
+  pageDescription?: string;
 }
 
 export interface ContactContent {
@@ -147,6 +153,69 @@ export interface ContactContent {
   successHeading?: string;
   successMessage?: string;
   errorMessage?: string;
+  /** Search title and description for this section's standalone page. Blank uses the built-in default. */
+  pageTitle?: string;
+  pageDescription?: string;
+}
+
+export interface LabeledFact {
+  id: string;
+  label: string;
+  value: string;
+}
+
+export interface FounderSpotlightContent {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  image: string;
+  imageAlt: string;
+  facts: LabeledFact[];
+  linkLabel: string;
+  linkHref: string;
+}
+
+export interface AboutChapter {
+  id: string;
+  tag: string;
+  title: string;
+  body: string;
+}
+
+export interface AboutPageContent {
+  seoTitle: string;
+  seoDescription: string;
+  heroBadge: string;
+  /** Headline is "{headingLead} {headingAccent}", the accent part in brand blue. */
+  headingLead: string;
+  headingAccent: string;
+  heroIntro: string;
+  heroImage: string;
+  heroImageAlt: string;
+  heroFacts: LabeledFact[];
+  heroCta: CTAItem;
+  /** Wrap words in *asterisks* to light them up in the accent color. */
+  statement: string;
+  storyImage: string;
+  storyImageAlt: string;
+  storyCaption: string;
+  chapters: AboutChapter[];
+  playbookEyebrow: string;
+  playbookHeading: string;
+  playbookIntro: string;
+  playbook: ValuePoint[];
+  qaEyebrow: string;
+  qaHeading: string;
+  /** Short initials shown next to each answer. */
+  qaInitials: string;
+  qa: FaqItem[];
+  ctaEyebrow: string;
+  ctaHeading: string;
+  ctaBody: string;
+  ctaImage: string;
+  ctaButton: CTAItem;
+  /** Text before the phone number on the call button, e.g. "Call". */
+  ctaPhoneLabel: string;
 }
 
 export type SectionType =
@@ -158,7 +227,13 @@ export type SectionType =
   | "acquisition-process"
   | "recent-acquisitions"
   | "faq"
-  | "contact";
+  | "contact"
+  | "founder-spotlight"
+  | "about-page";
+
+/** Types that live on their own page and never render in the homepage stack. */
+export type PageOnlySectionType = "about-page";
+export type HomeSectionType = Exclude<SectionType, PageOnlySectionType>;
 
 export interface SectionContentMap {
   hero: HeroContent;
@@ -170,6 +245,8 @@ export interface SectionContentMap {
   "recent-acquisitions": RecentAcquisitionsContent;
   faq: FaqContent;
   contact: ContactContent;
+  "founder-spotlight": FounderSpotlightContent;
+  "about-page": AboutPageContent;
 }
 
 export interface SectionRow<T extends SectionType = SectionType> {

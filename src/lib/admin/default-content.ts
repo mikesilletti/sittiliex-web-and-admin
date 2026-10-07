@@ -1,3 +1,4 @@
+import { ABOUT_PAGE_DEFAULTS } from "@/lib/page-content-defaults";
 import type { SectionContentMap, SectionType } from "@/types/content";
 
 // Structurally valid but empty-ish starting content for a newly created
@@ -64,6 +65,18 @@ const defaults: { [K in SectionType]: SectionContentMap[K] } = {
     email: "",
     backgroundImage: "",
   },
+  "founder-spotlight": {
+    eyebrow: "",
+    heading: "",
+    body: "",
+    image: "",
+    imageAlt: "",
+    facts: [],
+    linkLabel: "",
+    linkHref: "/about",
+  },
+  // Only ever created once, so it starts with the real copy rather than blanks.
+  "about-page": ABOUT_PAGE_DEFAULTS,
 };
 
 export function defaultContentFor<T extends SectionType>(type: T): SectionContentMap[T] {

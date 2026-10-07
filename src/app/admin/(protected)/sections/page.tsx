@@ -3,7 +3,7 @@ import { getAdminSupabaseClient } from "@/lib/supabase/admin";
 import { SectionsList } from "@/components/admin/SectionsList";
 import { VersionHistory } from "@/components/admin/VersionHistory";
 import { restoreSectionVersion } from "@/lib/admin/version-actions";
-import { sectionLabels } from "@/lib/section-registry";
+import { isPageOnlyType, sectionDescriptions, sectionLabels, sectionViewPaths } from "@/lib/section-registry";
 import type { SectionRow, SectionVersion } from "@/types/content";
 
 export default async function AdminSectionsPage() {
@@ -16,6 +16,8 @@ export default async function AdminSectionsPage() {
   // empty state whenever the fetch transiently fails.
   if (error) throw new Error(`Failed to load sections: ${error.message}`);
   const sections = (data ?? []) as SectionRow[];
+  const homeSections = sections.filter((s) => !isPageOnlyType(s.type));
+  const pageSections = sections.filter((s) => isPageOnlyType(s.type));
 
   // Deleted sections that can still be restored: their delete-snapshots,
   // newest per section, excluding any section that exists again.
@@ -42,9 +44,9 @@ export default async function AdminSectionsPage() {
           <Link href="/admin" className="text-xs text-foreground-muted hover:text-foreground">
             ← Dashboard
           </Link>
-          <h1 className="mt-2 text-display-sm font-heading text-foreground">Homepage Sections</h1>
+          <h1 className="mt-2 text-display-sm font-heading text-foreground">Site Content</h1>
           <p className="mt-1 text-body-sm text-foreground-muted">
-            Drag to reorder. Toggle visibility or delete. Changes go live within seconds.
+            Edit any text, photo or button on the site. Changes go live within seconds.
           </p>
         </div>
         <Link
@@ -55,14 +57,53 @@ export default async function AdminSectionsPage() {
         </Link>
       </div>
 
-      <div className="mt-8">
-        <SectionsList sections={sections} />
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-widest text-foreground-subtle">Homepage</h2>
+      <p className="mt-1 text-xs text-foreground-subtle">
+        Drag to reorder. The Acquisitions, FAQ and Contact pages use the same sections, so one edit updates both
+        places.
+      </p>
+      <div className="mt-4">
+        <SectionsList sections={homeSections} />
+      </div>
+
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-widest text-foreground-subtle">Other pages</h2>
+      <div className="mt-4 flex flex-col gap-2">
+        {pageSections.map((section) => (
+          <div
+            key={section.id}
+            className="flex items-center gap-3 rounded-md border border-border bg-background-raised px-4 py-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">{sectionLabels[section.type]}</p>
+              <p className="mt-0.5 truncate text-xs text-foreground-subtle">{sectionDescriptions[section.type]}</p>
+            </div>
+            <a
+              href={sectionViewPaths[section.type]}
+              target="_blank"
+              rel="noreferrer"
+              className="focus-ring hidden rounded-sm px-2 py-1 text-xs text-foreground-muted hover:text-foreground sm:inline"
+            >
+              View
+            </a>
+            <Link
+              href={`/admin/sections/${section.id}`}
+              className="focus-ring rounded-sm px-2 py-1 text-xs text-accent hover:text-accent-hover"
+            >
+              Edit
+            </Link>
+          </div>
+        ))}
+        {pageSections.length === 0 && (
+          <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-xs text-foreground-subtle">
+            The About page isn&apos;t set up for editing yet.
+          </p>
+        )}
       </div>
 
       {deleted.length > 0 && (
         <VersionHistory
           heading="Recently deleted"
-          description="Deleted sections keep a backup — restore brings them back at the bottom of the page."
+          description="Deleted sections keep a backup. Restoring brings them back at the bottom of the page."
           items={deleted.map((v) => ({
             id: v.id,
             title: sectionLabels[v.type],

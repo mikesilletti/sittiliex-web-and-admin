@@ -1,7 +1,5 @@
 import { getPublicSupabaseClient } from "@/lib/supabase/server";
-import { sectionRegistry } from "@/lib/section-registry";
-import { Fragment } from "react";
-import { FounderSpotlight } from "@/components/sections/FounderSpotlight";
+import { isPageOnlyType, sectionRegistry } from "@/lib/section-registry";
 import { ScrollToHashOnLoad } from "@/components/motion/ScrollToHashOnLoad";
 import type { SectionRow } from "@/types/content";
 
@@ -25,15 +23,11 @@ export default async function Home() {
     <main>
       <ScrollToHashOnLoad />
       {sections.map((section) => {
+        // Page-only rows (the About page) share the table but render on their own route.
+        if (isPageOnlyType(section.type)) return null;
         const Component = sectionRegistry[section.type];
         if (!Component) return null;
-        return (
-          <Fragment key={section.id}>
-            <Component content={section.content as never} />
-            {/* Founder teaser sits right after "Why Sell to Us", where owners decide whether to trust us. */}
-            {section.type === "why-sell-to-us" && <FounderSpotlight />}
-          </Fragment>
-        );
+        return <Component key={section.id} content={section.content as never} />;
       })}
     </main>
   );

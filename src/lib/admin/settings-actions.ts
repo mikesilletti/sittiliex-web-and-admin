@@ -40,7 +40,7 @@ async function saveScope(
     .eq("id", 1);
   if (error) return { error: error.message };
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath(`/admin/${scope}`);
   return { error: null };
 }

@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { Field } from "@/components/admin/Field";
 import { SaveBar } from "@/components/admin/SaveBar";
+import { PageSeoFields } from "@/components/admin/PageSeoFields";
+import { PAGE_SEO_DEFAULTS } from "@/lib/page-content-defaults";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
 import { Input, Textarea } from "@/components/ui/Input";
 import { updateSectionContent } from "@/lib/admin/section-actions";
@@ -89,6 +91,17 @@ export function ContactForm({ id, content }: { id: string; content: ContactConte
           </div>
         ))}
       </div>
+
+      <PageSeoFields
+        path={PAGE_SEO_DEFAULTS["contact"].path}
+        title={state.pageTitle}
+        description={state.pageDescription}
+        defaults={PAGE_SEO_DEFAULTS["contact"]}
+        onChange={(patch) => {
+          setState((prev) => ({ ...prev, ...patch }));
+          setStatus("idle");
+        }}
+      />
 
       <SaveBar isPending={isPending} status={status} onSave={save} errorMessage={saveError} />
     </div>
